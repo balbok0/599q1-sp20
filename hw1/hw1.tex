@@ -1,0 +1,375 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{qcircuit}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{}
+\rhead{\hmwkClass}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Problem \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Homework\ \#1}
+\newcommand{\hmwkDueDate}{April 10, 2020}
+\newcommand{\hmwkClass}{Intorduction to Quantum Computing}
+\newcommand{\hmwkAuthorName}{Jakub Filipek}
+
+%
+% Title Page
+%
+
+\title{
+    % \vspace{in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate\ at 3:10pm}\\
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[1]{\frac{\mathrm{d}}{\mathrm{d}x} (#1)}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #1} (#2)}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\begin{document}
+
+\maketitle
+
+% \pagebreak
+
+\begin{homeworkProblem}
+
+    \subsection*{Part (a)}
+    \begin{equation*}
+        \text{CNOT} = \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 1 & 0
+        \end{pmatrix}
+    \end{equation*}
+
+    \subsection*{Part (b)}
+    \[
+    \text{SWAP} = \Qcircuit @C=1em @R=.7em {
+            & \ctrl{1} & \targ     & \ctrl{1} & \qw \\
+            & \targ    & \ctrl{-1} & \targ    & \qw
+        }
+    \]
+
+    This is because
+    \begin{equation*}
+        \text{SWAP} = \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1
+        \end{pmatrix}
+    \end{equation*}
+    And the corresponding circuit is as follows: \\
+    \begin{align*}
+        \text{CNOT}_{01}\text{CNOT}_{10}\text{CNOT}_{01} &=
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 1 & 0
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 1 & 0
+        \end{pmatrix}\\
+        &=
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1
+        \end{pmatrix}
+    \end{align*}
+
+    It is reversible, because CNOTs are reversible. But also because:
+    \begin{align*}
+        \text{SWAP SWAP} &=\\
+        &=
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1
+        \end{pmatrix} \\
+        &=
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 0 & 0 & 1
+        \end{pmatrix}
+    \end{align*}
+
+    \subsection*{Part (c)}
+    To perform such N-bit swap, we not that we can just apply N SWAP gates on $e_{x_i}$ and $e_{y_i}$
+    qubits.
+    Hence we need to find a implementation of a swap gate with NOT and Toffoli.
+
+    Since the SWAP can be constructed entirely from CNOTs, we this becomes a problem of implementing
+    CNOT as combination of Toffoli and NOT gates.
+
+    \[
+    \Qcircuit @C=1em @R=.7em {
+        & \ctrl{1} & \targ     & \ctrl{1} & \qw &   &
+        & \qw      & \ctrl{1}  & \targ     & \ctrl{1}  & \qw & \\
+        & \targ    & \ctrl{-1} & \targ    & \qw & = &
+        & \qw      & \targ     & \ctrl{-1} & \targ     & \qw & \\
+        &          &           &          &     &   &
+        & \gate{X} & \ctrl{-1} & \ctrl{-2}  & \ctrl{-1} &     &
+    }
+    \]
+
+    Note that to implement a N-bit SWAP only one auxiliary qubit is needed,
+    and number of Toffoli gate is equal to $3N$.
+\end{homeworkProblem}
+
+\vspace{2cm}
+
+\begin{homeworkProblem}
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{ccc|c}
+            x & y & c & $x \oplus y$ \\
+            \hline
+            0 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 1 \\
+            1 & 0 & 0 & 1 \\
+            1 & 1 & 1 & 0 \\
+        \end{tabular}
+        \caption{Logical table for adding two bits}
+    \end{table}
+
+    As we can see $digit = XOR(x, y)$ and $c = AND(x, y)$. Fortunately there exist quantum gates which
+    do exactly that:
+
+    \[
+    \Qcircuit @C=1.5em @R=2em {
+        & \lstick{{|x\rangle}} & \qw & \ctrl{3} & \qw      & \ctrl{2} & \qw  & \rstick{|x\rangle}     & \\
+        & \lstick{{|y\rangle}} & \qw & \qw      & \ctrl{2} & \ctrl{1} & \qw  & \rstick{|y\rangle}     & \\
+        & \lstick{{|0\rangle}} & \qw & \qw      & \qw      & \targ    & \qw  & \rstick{|c\rangle}     & \\
+        & \lstick{{|0\rangle}} & \qw & \targ    & \targ    & \qw      & \qw  & \rstick{|x + y\rangle} &
+    }
+    \]
+\end{homeworkProblem}
+
+\pagebreak
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+    As mentioned in a lecture all reversible, classical gates, operating on probability distributions
+    are just permutations.
+
+    Since permutation does not change the size of the vector, then:
+    \begin{equation*}
+        |G\psi|_1 = |\psi|_1
+    \end{equation*}
+
+    Hence
+    \begin{align*}
+        \norm{G}_1 &= \\
+            &= \max_{|\psi|_1 = 1} |G\psi|_1 \\
+            &= \max_{|\psi|_1 = 1} |\psi|_1 \\
+            &= 1
+    \end{align*}
+
+    \subsection*{Part (b)}
+
+    \begin{align*}
+        \norm{\widetilde{G}}_1 &= \\
+            &= \max_{|\psi|_1 = 1} |\widetilde{G}\psi|_1 \\
+            &= \max_{|\psi|_1 = 1} |((1 - \epsilon)G + \epsilon E)\psi|_1
+    \end{align*}
+    Since $E$ has only non-negative components and $G$ is a permutation matrix:
+    \begin{align*}
+        \norm{\widetilde{G}}_1 &= \\
+            &= \max_{|\psi|_1 = 1} |(1 - \epsilon)G\psi|_1 + |\epsilon E\psi|_1 \\
+            &= \max_{|\psi|_1 = 1} (1 - \epsilon)|G\psi|_1 + \epsilon|E\psi|_1 \\
+            &= \max_{|\psi|_1 = 1} (1 - \epsilon) + \epsilon|E\psi|_1 \\
+            &= (1 - \epsilon) + \epsilon \max_{|\psi|_1 = 1} |E\psi|_1 \\
+            &= (1 - \epsilon) + \epsilon \norm{E}_1
+    \end{align*}
+
+    Hence, we can see that:
+    \begin{itemize}
+        \item If $\norm{E}_1 \ne 1$, then $\norm{\widetilde{G}}_1$ and hence $\widetilde{G}\psi$ is not a
+        properly normalized distribution.
+        \item If $\norm{\widetilde{G}}_1 = 1$, then $1 = (1 - \epsilon) + \epsilon\norm{\widetilde{E}}_1$
+        and hence $\norm{\widetilde{E}}_1 = 1$.
+    \end{itemize}
+
+    \subsection*{Part (c)}
+    \begin{align*}
+        |\widetilde{G}\psi - G\psi|_1 &= \\
+            &= |(\widetilde{G} - G)\psi|_1 \\
+            &= |(((1 - \epsilon)G + \epsilon E) - G)\psi|_1 \\
+            &= |(G - \epsilon G + \epsilon E - G)\psi|_1 \\
+            &= |(- \epsilon G + \epsilon E)\psi|_1 \\
+            &\le |(\epsilon G + \epsilon E)\psi|_1 \\
+            &= |\epsilon G\psi|_1 + |\epsilon E\psi|_1 \\
+            &= \epsilon + |\epsilon E\psi|_1 \\
+    \end{align*}
+
+    From last part we know that if $\widetilde{G}$ is a valid gate, then $\norm{E}_1 = 1$. Hence
+    \begin{align*}
+        |\widetilde{G}\psi - G\psi|_1 &\le \\
+            &\le \epsilon + |\epsilon E\psi|_1 \\
+            &= \epsilon + \epsilon \\
+            &= 2\epsilon
+    \end{align*}
+
+    \subsection*{Part (d)}
+    When we add noise to our \textit{clean} reversible gate of strength $\epsilon$,
+    the result will always be within $2\epsilon$ from the truth.
+
+    It shows that there is a linear dependency between noise level of our machine,
+    and our certainty in the result.
+\end{homeworkProblem}
+
+\vspace{2cm}
+\begin{homeworkProblem}
+    Hadamard Gate is an example of such operation.
+
+    Let $\psi = |+\rangle$.
+
+    Then $MH\psi = M|0\rangle = |0\rangle$.
+
+    However:
+    $HM\psi = H\begin{cases}
+        |0\rangle & \text{with } p = 0.5 \\
+        |1\rangle & \text{with } p = 0.5 \\
+    \end{cases} = 
+    \begin{cases}
+        |+\rangle & \text{with } p = 0.5 \\
+        |-\rangle & \text{with } p = 0.5 \\
+    \end{cases}
+    $
+
+    The reason for a difference is that quantum computers work on \textit{amplitude}
+    of a wavefunction instead its \textit{magnitude}. This allows their amplitudes to cancel completely out,
+    which is not possible in classical reversible computing.
+\end{homeworkProblem}
+
+\end{document}
