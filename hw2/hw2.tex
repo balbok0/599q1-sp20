@@ -1,0 +1,363 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{qcircuit}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{}
+\rhead{\hmwkClass}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+\usepackage[font={small,it}]{caption}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Question \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Homework\ \#1}
+\newcommand{\hmwkDueDate}{April 10, 2020}
+\newcommand{\hmwkClass}{Intorduction to Quantum Computing}
+\newcommand{\hmwkAuthorName}{Jakub Filipek}
+
+%
+% Title Page
+%
+
+\title{
+    % \vspace{in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate\ at 3:10pm}\\
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[1]{\frac{\mathrm{d}}{\mathrm{d}x} (#1)}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #1} (#2)}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\bra}[1]{\lstick#1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\qbra}{\bra{\psi}}
+\newcommand{\qket}{\ket{\psi}}
+
+\begin{document}
+
+\maketitle
+
+% \pagebreak
+
+\begin{homeworkProblem}
+
+    \subsection*{Part (a)}
+    We will prove that by contradiction.\\
+    Suppose such operation exists. Let $P$ be a probability. Then $1 = \sum\limits_i P_i$. \\
+    There also exists a 1-to-1 mapping $P \rightarrow Q$, where $1 = \sum\limits_i Q_i^2$, by applying a map:
+    \begin{equation*}
+        Q_i = \frac{P_i}{\sqrt{|\sum\limits_j P_j^2|}}
+    \end{equation*}
+
+    This way:
+    \begin{align*}
+        \sum\limits_i Q_i^2 &= \\
+            &= \sum\limits_i (\frac{P_i}{\sqrt{|\sum\limits_j P_j^2|}})^2 \\
+            &= \sum\limits_i \frac{P_i^2}{\sqrt{|\sum\limits_j P_j^2|}^2} \\
+            &= \sum\limits_i \frac{P_i^2}{|\sum\limits_j P_j^2|} \\
+            &= \frac{\sum\limits_i P_i^2}{\sum\limits_j P_j^2} \\
+            &= 1
+    \end{align*}
+
+    Hence Q is a valid distribution for a quantum state. Since Q cannot be copied due to the \textit{No Clonning Theorem} on quantum distributions,
+    that implies that P cannot be copied too (if it could then going
+    $Q, 0 \rightarrow P, 0, \rightarrow P, P \rightarrow Q, Q$ would
+    break quantum version of \textit{No Clonning Theorem}).
+
+    Hence probability distributions cannot be cloned.
+
+    \subsection*{Part (b)}
+    \textbf{\textcolor{red}{TODO}}
+\end{homeworkProblem}
+
+\vspace{2cm}
+
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+    First let us denote states as integers. Hence $\ket{10010} = \ket{18}$ or just $18$ in table below.
+
+    Let us consider the left side of the circuit. I omitted states 4-7 and 12-31. This is because we know that third and fifth qubit are in $\ket{0}$ on entrance.
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{r|ccc}
+            Operation: & Toffoli & Toffoli & Toffoli \\
+            0  & 0  & 0  & 0  \\
+            1  & 1  & 1  & 1  \\
+            2  & 2  & 2  & 2  \\
+            3  & 7  & 7  & 3 \\
+            8  & 8  & 8  & 8  \\
+            9  & 9  & 9  & 9  \\
+            10 & 10 & 10 & 10 \\
+            11 & 15 & 31 & 27 \\
+        \end{tabular}
+        \caption{Table for left side of the equation. The first and third Toffoli gates are controlled on first and second qubit, with third as a target, while the middle is controlled on third and fourth, with fifth qubit as a target.}
+    \end{table}
+
+    Then let us consider right side of the equation. Since the first two Toffoli gates we can combine these steps. Secondly, we can push the measurement of the third qubit back, and make doubly controlled Z gate be controlled on 2 qubits (instead of qubit and a bit). This way we measure third qubit right after that controlled Z gate
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{r|cccc}
+            Operation: & 2 x Toffoli & H & CCZ & Measurement + Classical Flip \\
+            0  & 0  & 0 + 4   & 0 + 4   & 0 \\
+            1  & 1  & 1 + 5   & 1 + 5   & 1 \\
+            2  & 2  & 2 + 6   & 2 + 6   & 2 \\
+            3  & 7  & 3 - 7   & 3 + 7   & 3 \\
+            8  & 8  & 8 + 12  & 8 + 12  & 8 \\
+            9  & 9  & 9 + 13  & 9 + 13  & 9 \\
+            10 & 10 & 10 + 14 & 10 + 14 & 10 \\
+            11 & 31 & 27 - 31 & 27 + 31 & 27 \\
+        \end{tabular}
+        \caption{Table for right side of the equation. The CCZ is Controlled-Controlled-Z Gate, with first and third qubits being contols, and second being a target. The Measurement and Classical Flip of the third qubit are combined into one step, since they occur on classical computation.}
+        \label{table:2a}
+    \end{table}
+
+    Since last column in both table for left and right side of the equation are the same.
+
+    \subsection*{Part (b)}
+    The assumption is the fact that the resulting 5 qubit state can be written as a product state of third qubit with remaining 4 qubits. \\
+    Hence measuring it does not affect other states (apart from possibly flipping the global phase, which is then flipped back).
+
+    \subsection*{Part (c)}
+
+    The Naive (Left side) generalization of the $N$-bit is as follows
+    \[
+        \Qcircuit @C=1em @R=1.5em {
+            \lstick{\qket_{0..N-2}} & \ctrl{1}     & \qw       & \ctrl{1}  & \qw \\
+            \lstick{\ket{0}}        & \targ        & \ctrl{2}  & \targ     & \qw \\
+            \lstick{\qket_{N-1}}    & \qw          & \ctrl{1}  & \qw       & \qw \\
+            \lstick{\ket{0}}        & \qw          & \targ     & \qw       & \qw \\
+        }
+    \]
+    We can see that it already uses $C^{N-1}(X)$ and $C^2{X}$ gates.
+
+    For the right side, first, lets note that $C^n(Z) = HC^n(X)H$, where Hadamard Gates are performed on the target qubit. \\
+    Then the circuit below generalizes the Craig Gidney circuit to $N$ qubits:
+
+    \[
+        \Qcircuit @C=1em @R=1em {
+                \lstick{\qket_{0..N-3}} & \ctrl{2} & \qw       & \qw       & \ctrl{1}      & \qw       & \qw              \\
+                \lstick{\qket_{N-2}}    & \ctrl{1} & \qw       & \gate{H}  & \targ \cwx[1] & \gate{H}  & \qw              \\
+                \lstick{\ket{0}}        & \targ    & \ctrl{2}  & \gate{H}  & \meter        &           & \rstick{\ket{0}} \\
+                \lstick{\qket_{N-1}}    & \qw      & \ctrl{1}  & \qw       & \qw           & \qw       & \qw              \\
+                \lstick{\ket{0}}        & \qw      & \targ     & \qw       & \qw           & \qw       & \qw              \\
+        }
+    \]
+
+    Let us note that the half-classically, half-quantum controlled gate in a middle is really a $C^{N-2}(X)$ gate, but is only applied iff the measurement is $1$.
+    Then, while not noted in the circuit the ancilla qubit is flipped (conditioned classically) to $\ket{0}$. This can happen at any time after $C^{N-2}(X)$.
+
+    In that case we can think of the above circuit in the same exact way as a circuit from part a, if we think of $\qket_{0..N-3}$ as just $\qket_3$, which is $\ket{1}$ iff
+    $\qket_{0..N-3} = \ket{11...11}$, and $\ket{0}$ otherwise.\\
+
+    Hence we can use Table~\ref{table:2a}, to prove that this one works (since, as mentioned in class $HXH = Z$).
+
+    \subsection*{Part (d)}
+
+    Firstly let's note that the ancilla qubit is a target of $C^{N-1}(X)$. Hence, apart from base case any new step up the stack of $N$'s adds just a 1 new qubit per operation.
+    This except for a base case ($N = 3$), where we need 2 qubits (ancilla and target). \\
+
+    Then number for implementation of $C^{N-2}(X)$ we can just reuse these ancilla qubits, because all of them will be in $\ket{0}$, when the main $C^2(X)$ is applied.
+    Hence, no additional qubits are required for this step.
+
+    \begin{align*}
+        Q(N) &= \\
+            &=  \begin{cases}
+                    2 & \text{if }N = 3\\
+                    1 + Q(N - 1) & \text{otherwise}
+                \end{cases} \\
+            &= 1 + \sum\limits_3^{N} 1 \\
+            &\in O(N)
+    \end{align*}
+
+    Let $T(N)$ be a function that outputs number of Toffoli's given number of control qubits. Then $T(3) = 2$, otherwise:
+    \begin{align*}
+        T(N) &= \\
+             &= 1 + T(N - 1) + T(N - 2) \\
+             &\le 1 + 2T(N - 1) \\
+             &= 1 + \sum\limits_{i = 3}^{N-1}2^i \\
+             &\le 1 + \sum\limits_{i = 0}^{N-1}2^i \\
+             &= 1 + 2^N - 1 \\
+             &\in O(2^N)
+    \end{align*}
+
+    Lastly let $C(N)$ be a function that outputs a number of CNOT gates, given the number of control qubits. In the base case $T(3) = 1$, otherwise:
+    \begin{align*}
+        C(N) = T(N-1) + T(N-2)
+    \end{align*}
+
+    This is just a Fibonacci formula. Fibonacci numbers are bounded by $O(2^N)$. Hence, $C(N) \in O(2^N)$.
+
+\end{homeworkProblem}
+
+\pagebreak
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+
+    Let $\qket$ denote Alice's state. Then, since it is a pure (product)
+
+\end{homeworkProblem}
+
+\pagebreak
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+    \begin{align*}
+        XR_Z(\theta)X &= \\
+            &= \begin{pmatrix}
+                0 & 1 \\
+                1 & 0
+            \end{pmatrix}
+            \begin{pmatrix}
+                e^{-i\frac{\theta}{2}} & 0 \\
+                0 & e^{i\frac{\theta}{2}}
+            \end{pmatrix}
+            \begin{pmatrix}
+                0 & 1 \\
+                1 & 0
+            \end{pmatrix} \\
+            &= \begin{pmatrix}
+                0 & 1 \\
+                1 & 0
+            \end{pmatrix}
+            \begin{pmatrix}
+                0 & e^{-i\frac{\theta}{2}} \\
+                e^{i\frac{\theta}{2}} & 0
+            \end{pmatrix} \\
+            &=
+            \begin{pmatrix}
+                e^{i\frac{\theta}{2}} & 0 \\
+                0 & e^{-i\frac{\theta}{2}}
+            \end{pmatrix} \\
+            &=
+            \begin{pmatrix}
+                e^{-i\frac{-\theta}{2}} & 0 \\
+                0 & e^{i\frac{-\theta}{2}}
+            \end{pmatrix} \\
+            &= R_Z(-\theta)
+    \end{align*}
+
+    \subsection*{Part (b)}
+    \[
+        \Qcircuit @C=1em @R=1.5em {
+            \lstick{\ket{a}}        & \qw                         & \ctrl{1}   & \qw                           & \ctrl{1} & \qw \\
+            \lstick{\ket{b}}        & \gate{R_z(\frac{\theta}{2})} & \targ     & \gate{R_z(-\frac{\theta}{2})} & \targ    & \qw \\
+        }
+    \]
+
+    \begin{itemize}
+        \item if $\ket{a} = \ket{0}$, then the behaves as follows: $\ket{a}\ket{b} \rightarrow \ket{a}R_z(-\frac{\theta}{2})R_z(\frac{\theta}{2})\ket{b}$,
+        since we rotate, and then \textit{unrotate} $\ket{b}$, then this is just $\ket{a}\ket{b} \rightarrow \ket{a}\ket{b}$. Which is how controlled gate would behave.
+        \item if $\ket{a} = \ket{1}$, then the behaves as follows: $\ket{a}\ket{b} \rightarrow \ket{a}XR_z(-\frac{\theta}{2})XR_z(\frac{\theta}{2})\ket{b}$. \\
+        From part a, we can shorten this circuit to: $\ket{a}\ket{b} \rightarrow \ket{a}R_z(\frac{\theta}{2})R_z(\frac{\theta}{2})\ket{b} = \ket{a}R_z(\theta)\ket{b}$.
+    \end{itemize}
+
+    Hence this circuit behaves like Controlled $R_Z(\theta)$.
+
+\end{homeworkProblem}
+
+\end{document}
