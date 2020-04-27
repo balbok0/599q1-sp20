@@ -149,31 +149,22 @@
 
     \subsection*{Part (a)}
     We will prove that by contradiction.\\
-    Suppose such operation exists. Let $P$ be a probability. Then $1 = \sum\limits_i P_i$. \\
-    There also exists a 1-to-1 mapping $P \rightarrow Q$, where $1 = \sum\limits_i Q_i^2$, by applying a map:
-    \begin{equation*}
-        Q_i = \frac{P_i}{\sqrt{|\sum\limits_j P_j^2|}}
-    \end{equation*}
+    Suppose such operation exists. Let $P$ be a probability. Then there exists a quantum state $Q$ such that, $P$ corresponds to probabilities of that state.
 
-    This way:
-    \begin{align*}
-        \sum\limits_i Q_i^2 &= \\
-            &= \sum\limits_i (\frac{P_i}{\sqrt{|\sum\limits_j P_j^2|}})^2 \\
-            &= \sum\limits_i \frac{P_i^2}{\sqrt{|\sum\limits_j P_j^2|}^2} \\
-            &= \sum\limits_i \frac{P_i^2}{|\sum\limits_j P_j^2|} \\
-            &= \frac{\sum\limits_i P_i^2}{\sum\limits_j P_j^2} \\
-            &= 1
-    \end{align*}
+    In fact for each $P$ there exist multiple quantum states $Q$, but for each $Q$ there exists a unique probability state $P$.
 
-    Hence Q is a valid distribution for a quantum state. Since Q cannot be copied due to the \textit{No Clonning Theorem} on quantum distributions,
+    Since $Q$ cannot be copied due to the \textit{No Clonning Theorem} on quantum distributions,
     that implies that P cannot be copied too (if it could then going
-    $Q, 0 \rightarrow P, 0, \rightarrow P, P \rightarrow Q, Q$ would
-    break quantum version of \textit{No Clonning Theorem}).
+    \begin{equation*}
+        Q, 0 \rightarrow P, 0, \rightarrow P, P \rightarrow Q, Q
+    \end{equation*}
+    would break quantum version of \textit{No Clonning Theorem}).
 
     Hence probability distributions cannot be cloned.
 
     \subsection*{Part (b)}
-    \textbf{\textcolor{red}{TODO}}
+    The main similarity is the fact that they go hand in hand, and if one is true, then the other is true too.
+    However, their main difference is in the fact the probability states have to preserve $L_1$ norm, while quantum states have to preserve $L_2$ norm.
 \end{homeworkProblem}
 
 \vspace{2cm}
@@ -295,15 +286,64 @@
 
 \end{homeworkProblem}
 
-\pagebreak
+\vspace{2cm}
+
 \begin{homeworkProblem}
     \subsection*{Part (a)}
 
     Let $\qket$ denote Alice's state. Then, since it is a pure (product)
 
+    \subsection*{Part (b)}
+    Let us first consider the probability that a single qubit reached Bob:
+    \begin{equation*}
+        P(Q) = (1 - P)^d
+    \end{equation*}
+
+    Lastly, let $R$ denote an number of successful runs, given $r$ tries.
+    Then, since it is a binomial distribution of Bernoulli runs with $p=P(Q)$:
+    \begin{align*}
+        E[R] &= r(1 - P)^{dN} \\
+    \end{align*}
+
+    Let $1 - \delta$ denote the high probability, of transferring at least one state. Then:
+    \begin{align*}
+        1 - \delta &\le P(R \ge 1) \le \frac{E[R]}{1} \\
+        1 - \delta &\le r(1 - P)^{dN} \\
+        \frac{1 - \delta}{(1 - P)^{dN}} &\le r \\
+    \end{align*}
+
+    Hence we see that $r \in \Theta(\frac{1}{(1 - P)^{dN}})$
+
+    \subsection*{Part (c)}
+    Now instead we will use stations. Hence probability of single qubit reaching next station is:
+    \begin{equation*}
+        P(Q) = (1 - P) = E[Q]
+    \end{equation*}
+
+    Then, for a whole state to reach a next station is:
+    \begin{equation*}
+        P(S) = (1 - P)^N = E[S]
+    \end{equation*}
+
+    Lastly, let $R$ denote an number of successful transfers (between 2 stations), given $r$ tries.
+    \begin{equation*}
+        E[R] = r(1 - P)^N
+    \end{equation*}
+
+    We will need to transfer a state successfully $d$ times. Hence:
+    \begin{align*}
+        1 - \delta &\le P(R \ge d) \le \frac{E[R]}{d} \\
+        1 - \delta &\le r\frac{(1 - P)^{N}}{d} \\
+        d\frac{1 - \delta}{(1 - P)^{N}} &\le r \\
+    \end{align*}
+
+    Hence we see that $r \in \Theta(\frac{d}{(1 - P)^{dN}})$, which is exponentially better in $d$ then in case of part b.
+
+    \textcolor{red}{\textbf{TODO: FINISH THE PROBLEM}}
+
 \end{homeworkProblem}
 
-\pagebreak
+\vspace{2cm}
 \begin{homeworkProblem}
     \subsection*{Part (a)}
     \begin{align*}

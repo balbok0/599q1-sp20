@@ -1,0 +1,308 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{qcircuit}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{}
+\rhead{\hmwkClass}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Problem \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Homework\ \#1}
+\newcommand{\hmwkDueDate}{April 10, 2020}
+\newcommand{\hmwkClass}{Intorduction to Quantum Computing}
+\newcommand{\hmwkAuthorName}{Jakub Filipek}
+
+%
+% Title Page
+%
+
+\title{
+    % \vspace{in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate\ at 3:10pm}\\
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[1]{\frac{\mathrm{d}}{\mathrm{d}x} (#1)}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #1} (#2)}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\newcommand{\bra}[1]{\lstick#1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\qbra}{\bra{\psi}}
+\newcommand{\qket}{\ket{\psi}}
+
+
+\newcommand{\qwxo}[2][-1]{\ar @{-} [#1,0]|*+<2pt,4pt>[Fo]{#2}}
+
+\begin{document}
+
+\maketitle
+
+% \pagebreak
+
+\begin{homeworkProblem}
+
+    \begin{figure}[h]
+        \[\Qcircuit @C=1em @R=1em {
+                & \qswap      & \gate{H} & \gate{\sqrt{X}} & \qw \\
+                & \qswap \qwx & \gate{H} & \ctrl{-1}       & \qw
+            }
+        \]
+        \caption{Simplified Circuit for Problem 1}
+        \label{circ:p1}
+    \end{figure}
+
+    \subsection*{Part (a)}
+
+    Let us look at Fig.~\ref{circ:p1}. The matrices for given operations are as follow:
+    \begin{align*}
+        \text{SWAP} &= \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+        \end{pmatrix} \\
+        H \otimes I &= \frac{1}{\sqrt{2}}\begin{pmatrix}
+            1 & 0 & 1  & 0  \\
+            0 & 1 & 0  & 1  \\
+            1 & 0 & -1 & 0  \\
+            0 & 1 & 0  & -1 \\
+        \end{pmatrix} \\
+        I \otimes H &= \frac{1}{\sqrt{2}}\begin{pmatrix}
+            1 & 1  & 0 & 0  \\
+            1 & -1 & 0 & 0  \\
+            0 & 0  & 1 & 1  \\
+            0 & 0  & 1 & -1 \\
+        \end{pmatrix} \\
+        \text{C} \sqrt{X} &= \begin{pmatrix}
+            1 & 0                & 0 & 0               \\
+            0 & \frac{1 + i}{2}  & 0 & \frac{1 - i}{2} \\
+            0 & 0                & 1 & 0               \\
+            0 & \frac{1 - i}{2}  & 0 & \frac{1 + i}{2} \\
+        \end{pmatrix} \\
+    \end{align*}
+
+    We can see that SWAP and C$\sqrt{X}$ are already two-level unitaries.
+
+    For both Hadamard gates:
+    \begin{align*}
+        U_1 &= \begin{pmatrix}
+            \frac{1}{\sqrt{2}} & 0 & \frac{1}{\sqrt{2}} & 0 \\
+            0 & 1 & 0 & 0 \\
+            \frac{1}{\sqrt{2}} & 0 & -\frac{1}{\sqrt{2}} & 0 \\
+            0 & 0 & 0 & 1 \\
+        \end{pmatrix} \\
+        U_2 = U_1(H \otimes I) &= \frac{1}{\sqrt{2}}
+        \begin{pmatrix}
+            \frac{1}{\sqrt{2}} & 0 & \frac{1}{\sqrt{2}} & 0 \\
+            0 & 1 & 0 & 0 \\
+            \frac{1}{\sqrt{2}} & 0 & -\frac{1}{\sqrt{2}} & 0 \\
+            0 & 0 & 0 & 1 \\
+        \end{pmatrix}\begin{pmatrix}
+            1 & 0 & 1  & 0  \\
+            0 & 1 & 0  & 1  \\
+            1 & 0 & -1 & 0  \\
+            0 & 1 & 0  & -1 \\
+        \end{pmatrix} \\
+        &= \begin{pmatrix}
+            1 & 0 & 0 & 0  \\
+            0 & \frac{1}{\sqrt{2}} & 0 & \frac{1}{\sqrt{2}}  \\
+            0 & 0 & 1 & 0  \\
+            0 & \frac{1}{\sqrt{2}} & 0 & -\frac{1}{\sqrt{2}} \\
+        \end{pmatrix} \\
+        U_3 &= \begin{pmatrix}
+            \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} & 0 & 0  \\
+            \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} & 0 & 0  \\
+            0 & 0  & 1 & 0  \\
+            0 & 0  & 0 & 1 \\
+        \end{pmatrix} \\
+        U_4 = U_3(I \otimes H) &= \frac{1}{\sqrt{2}}
+        \begin{pmatrix}
+            \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} & 0 & 0  \\
+            \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} & 0 & 0  \\
+            0 & 0  & 1 & 0  \\
+            0 & 0  & 0 & 1 \\
+        \end{pmatrix}\begin{pmatrix}
+            1 & 1  & 0 & 0  \\
+            1 & -1 & 0 & 0  \\
+            0 & 0  & 1 & 1  \\
+            0 & 0  & 1 & -1 \\
+        \end{pmatrix} \\
+        &= \begin{pmatrix}
+            1 & 0 & 0 & 0  \\
+            0 & 1 & 0 & 0  \\
+            0 & 0 & 1 & 0  \\
+            0 & 0 & 0 & -1 \\
+        \end{pmatrix}
+    \end{align*}
+
+    Hence the original matrix can be decomposed as:
+    \begin{equation*}
+        \text{C}(\sqrt{X})(U_4^\dagger U_3^\dagger U_2^\dagger U_1^\dagger)\text{SWAP}
+    \end{equation*}
+
+    \subsection*{Part (b)}
+
+    Let us look again at a circuit on Fig.~\ref{circ:p1}.
+    Swap can be expressed as three CNOT (and hence Toffoli) gates.
+
+    \paragraph*{}
+
+    Then the controlled \textit{square-root-of-not} can be expressed as:
+    \[\Qcircuit @C=1em @R=2em {
+            & \ctrl{1} & \qswap                                                        & \ctrl{1} & \qw \\
+            & \targ    & \qswap \qwxo{\scalebox{0.5}{$1\hspace{-1pt}/\hspace{-1pt}2$}} & \targ    & \qw
+        }
+    \]
+
+    Where $\sqrt{SWAP}$ gate can be expressed as series of CNOTs, $R_Z$ and $R_Y$ rotations
+
+\end{homeworkProblem}
+
+\newpage
+\begin{homeworkProblem}
+
+\end{homeworkProblem}
+
+\newpage
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+
+    \begin{align*}
+        \qket &= \sqrt{\frac{e-1}{e}} \sum\limits_{x=0}^\infty e^{-x/2}\ket{x} \\
+            &= \sqrt{\frac{e-1}{e}} (\sum\limits_{x=0}^\infty e^{-x}\ket{2x} + \sum\limits_{x=0}^\infty e^{-x - 1/2}\ket{2x+1}) \\
+            &= \sqrt{\frac{e-1}{e}} (\sum\limits_{x=0}^\infty e^{-x}\ket{2x} + e^{-1/2}\sum\limits_{x=0}^\infty e^{-x}\ket{2x+1}) \\
+    \end{align*}
+
+    Then we see that the ratio of probabilities of even and odd numbers is:
+    \begin{equation*}
+        \frac{P(\text{even})}{P(\text{odd})} = \frac{1^2}{(e^{-1/2})^2} = e
+    \end{equation*}
+
+    Then from probability:
+    \begin{align*}
+        1 &= P(\text{all}) = P(\text{odd}) + P(\text{even}) \\
+          &= P(\text{even})\frac{P(\text{odd})}{P(\text{even})} + P(\text{even}) \\
+          &= P(\text{even})e^{-1} + P(\text{even}) \\
+          &= P(\text{even})(1 + \frac{1}{e}) = 1
+    \end{align*}
+
+    Hence:
+    \begin{align*}
+        P(\text{even})(1 + \frac{1}{e}) = 1 \\
+        P(\text{even}) = \frac{1}{(1 + \frac{1}{e})} \\
+        P(\text{even}) = \frac{e}{(e + 1)}
+    \end{align*}
+
+    \subsection*{Part (b)}
+
+\end{homeworkProblem}
+\end{document}
