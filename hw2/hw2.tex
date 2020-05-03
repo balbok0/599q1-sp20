@@ -89,7 +89,7 @@
 %
 
 \newcommand{\hmwkTitle}{Homework\ \#1}
-\newcommand{\hmwkDueDate}{April 10, 2020}
+\newcommand{\hmwkDueDate}{April 28, 2020}
 \newcommand{\hmwkClass}{Intorduction to Quantum Computing}
 \newcommand{\hmwkAuthorName}{Jakub Filipek}
 
@@ -100,7 +100,7 @@
 \title{
     % \vspace{in}
     \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
-    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate\ at 3:10pm}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
 }
 
 \author{\hmwkAuthorName}
@@ -291,7 +291,13 @@
 \begin{homeworkProblem}
     \subsection*{Part (a)}
 
-    Let $\qket$ denote Alice's state. Then, since it is a pure (product)
+    Let $\qket$ denote Alice's state.
+    If $\qket$ is a product state, then we can trivially see, that we can teleport each qubit separately, and they will not affect each other.
+
+    If $\qket$ is an entangled state, then the same protocol (applied to each qubit) would also work.
+    Let us assume that $\ket{\psi_i}$ and $\ket{\psi_j}$ are entangled. Then $\ket{0_{Ai}}$ and $\ket{0_{Aj}}$ would also get entangled during a process of teleportation protocol.
+    Hence, their measurement results would not be independent from each other, and then there would be exact correlation between $X$ and $Z$ gates applied to the $\ket{0_{Bi}}$ and $\ket{0_{Bj}}$.
+    Because of that Bob would also receive a quantum state entangled in the exactly same way as the Alice's.
 
     \subsection*{Part (b)}
     Let us first consider the probability that a single qubit reached Bob:
@@ -339,8 +345,22 @@
 
     Hence we see that $r \in \Theta(\frac{d}{(1 - P)^{dN}})$, which is exponentially better in $d$ then in case of part b.
 
-    \textcolor{red}{\textbf{TODO: FINISH THE PROBLEM}}
+    \paragraph{}
+    Let us assume, that Alice cannot generate copies of the state. With assumption that when state gets lost there is no information from it, we can do the following.
+    Let Alice prepare $r$ different states, and call this set $\Gamma$. For each $\ket{\gamma} \in \Gamma$, each qubit in gamma will be applied this transformation:
+    \[
+        \Qcircuit @C=1em @R=1em {
+                \lstick{\ket{\psi_i}}   & \ctrl{1} & \qw & \\
+                \lstick{\ket{0}} & \targ    & \qw & \rstick{\ket{\gamma_i}} \\
+        }
+    \]
 
+    Hence $\ket{\gamma}$ will be strongly entangled with $\ket{\psi}$.
+
+    Then we just send all states in $\Gamma$. They can be lost, and measured (after being lost), but since we will receive none of that information,
+    we can assume as if it did not happen. This is, $\ket{\psi}$ will become a mixed state, but to us there will be no difference, and we can view it a pure state.
+
+    This way we can just repeat the procedure described in part c, and get $1 - \delta$ success rate.
 \end{homeworkProblem}
 
 \vspace{2cm}

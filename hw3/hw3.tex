@@ -88,7 +88,7 @@
 %
 
 \newcommand{\hmwkTitle}{Homework\ \#1}
-\newcommand{\hmwkDueDate}{April 10, 2020}
+\newcommand{\hmwkDueDate}{April 28, 2020}
 \newcommand{\hmwkClass}{Intorduction to Quantum Computing}
 \newcommand{\hmwkAuthorName}{Jakub Filipek}
 
@@ -99,7 +99,7 @@
 \title{
     % \vspace{in}
     \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
-    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate\ at 3:10pm}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
 }
 
 \author{\hmwkAuthorName}
@@ -150,17 +150,17 @@
 
 \begin{homeworkProblem}
 
+    \subsection*{Part (a)}
+
     \begin{figure}[h]
         \[\Qcircuit @C=1em @R=1em {
                 & \qswap      & \gate{H} & \gate{\sqrt{X}} & \qw \\
                 & \qswap \qwx & \gate{H} & \ctrl{-1}       & \qw
             }
         \]
-        \caption{Simplified Circuit for Problem 1}
+        \caption{Simplified Circuit for Problem 1a}
         \label{circ:p1}
     \end{figure}
-
-    \subsection*{Part (a)}
 
     Let us look at Fig.~\ref{circ:p1}. The matrices for given operations are as follow:
     \begin{align*}
@@ -251,28 +251,209 @@
 
     \subsection*{Part (b)}
 
-    Let us look again at a circuit on Fig.~\ref{circ:p1}.
-    Swap can be expressed as three CNOT (and hence Toffoli) gates.
+    \begin{figure}[h]
+        \[\Qcircuit @C=1em @R=1em {
+                & \qswap      & \qw      & \ctrl{1} & \gate{H} & \qw \\
+                & \qswap \qwx & \gate{H} & \gate{S} & \qw      & \qw
+            }
+        \]
+        \caption{Simplified Circuit for Problem 1b}
+    \end{figure}
+
+    The above circuit also evaluates to the original matrix.
+
+    Firstly, let's note that SWAP gate can be decomposed into 3 Toffoli's. Then, the Controlled S gate can be written as:
+    \[\Qcircuit @C=1em @R=1em {
+        \lstick{\ket{0}} & \targ     & \gate{R_Z(\frac{\pi}{2})}  & \targ     & \qw & \rstick{\ket{0}} \\
+                         & \ctrl{-1} & \qw                        & \ctrl{-1} & \qw &                  \\
+                         & \ctrl{-2} & \qw                        & \ctrl{-2} & \qw &
+      }
+    \]
+
+    Where $HR_Z(\pi)H = HZH = X$, and $R_Z(\frac{\pi}{2}) = S$.
+
+    Overall then a whole circuit can be written as:
+
+    \begin{figure}[h]
+        \[\Qcircuit @C=1em @R=1em {
+            \lstick{\ket{0}} & \qw      & \qw             & \qw      & \qw       & \qw      & \qw       & \targ     & \gate{R_Z(\frac{\pi}{2})}  & \targ     & \qw      & \qw             & \qw      & \qw & \rstick{\ket{0}} \\
+            \lstick{\ket{0}} & \gate{H} & \gate{R_Z(\pi)} & \gate{H} & \ctrl{1}  & \ctrl{2} & \ctrl{1}  & \qw       & \qw                        & \qw       & \gate{H} & \gate{R_Z(\pi)} & \gate{H} & \qw & \rstick{\ket{0}} \\
+                             & \qw      & \qw             & \qw      & \targ     & \ctrl{1} & \targ     & \ctrl{-2} & \qw                        & \ctrl{-2} & \gate{H} & \qw             & \qw      & \qw & \\
+                             & \qw      & \qw             & \gate{H} & \ctrl{-1} & \targ    & \ctrl{-1} & \ctrl{-3} & \qw                        & \ctrl{-3} & \qw      & \qw             & \qw      & \qw &
+            }
+        \]
+        \caption{Full Circuit for Problem 1b}
+    \end{figure}
 
     \paragraph*{}
 
-    Then the controlled \textit{square-root-of-not} can be expressed as:
-    \[\Qcircuit @C=1em @R=2em {
-            & \ctrl{1} & \qswap                                                        & \ctrl{1} & \qw \\
-            & \targ    & \qswap \qwxo{\scalebox{0.5}{$1\hspace{-1pt}/\hspace{-1pt}2$}} & \targ    & \qw
-        }
-    \]
+    This circuit contains:
+    \begin{itemize}
+        \item 6 Hadamard gates
+        \item 3 $R_Z$ gates
+        \item 5 Toffoli gates
+    \end{itemize}
 
-    Where $\sqrt{SWAP}$ gate can be expressed as series of CNOTs, $R_Z$ and $R_Y$ rotations
-
+    While it is not the most optimal solution (i.e. there exists a solution with only one ancilla qubit), it works.
 \end{homeworkProblem}
 
-\newpage
+\vspace{2cm}
 \begin{homeworkProblem}
 
+    Let us create an $R_Z(\theta)$ gate.
+
+    \begin{figure}[h]
+        \[\Qcircuit @C=1em @R=1em {
+            & \ctrl{1}            & \gate{X} & \ctrl{1}           & \gate{X} & \qw \\
+            & \gate{R_X(-\theta)} & \qw      & \gate{R_X(\theta)} & \qw      & \qw
+        }\]
+    \end{figure}
+
+    Let us analyze the above circuit:
+    \begin{align*}
+        \begin{pmatrix}
+            0 & 0 & 1 & 0 \\
+            0 & 0 & 0 & 1 \\
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & \cos(\frac{\theta}{2}) & -i\sin(\frac{\theta}{2}) \\
+            0 & 0 & -i\sin(\frac{\theta}{2}) & \cos(\frac{\theta}{2}) \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            0 & 0 & 1 & 0 \\
+            0 & 0 & 0 & 1 \\
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & \cos(\frac{-\theta}{2}) & -i\sin(\frac{-\theta}{2}) \\
+            0 & 0 & -i\sin(\frac{-\theta}{2}) & \cos(\frac{-\theta}{2}) \\
+        \end{pmatrix} = \\
+        \begin{pmatrix}
+            0 & 0 & \cos(\frac{\theta}{2}) & -i\sin(\frac{\theta}{2}) \\
+            0 & 0 & -i\sin(\frac{\theta}{2}) & \cos(\frac{\theta}{2}) \\
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            0 & 0 & \cos(\frac{-\theta}{2}) & -i\sin(\frac{-\theta}{2}) \\
+            0 & 0 & -i\sin(\frac{-\theta}{2}) & \cos(\frac{-\theta}{2}) \\
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+        \end{pmatrix} = \\
+        \begin{pmatrix}
+            \cos(\frac{\theta}{2}) & -i\sin(\frac{\theta}{2}) & 0 & 0 \\
+            -i\sin(\frac{\theta}{2}) & \cos(\frac{\theta}{2}) & 0 & 0 \\
+            0 & 0 & \cos(\frac{-\theta}{2}) & -i\sin(\frac{-\theta}{2}) \\
+            0 & 0 & -i\sin(\frac{-\theta}{2}) & \cos(\frac{-\theta}{2}) \\
+        \end{pmatrix}
+    \end{align*}
+
+
+    Let us consider what happens when a $\ket{0+}$ state is applied:
+    \begin{align*}
+        \ket{0+} = \frac{1}{\sqrt{2}} (\ket{00} + \ket{01}) &\rightarrow \\
+        \frac{1}{\sqrt{2}} ((\cos(\frac{\theta}{2})\ket{00} - i\sin(\frac{\theta}{2}) \ket{01}) + (- i\sin(\frac{\theta}{2})\ket{00} + \cos(\frac{\theta}{2})\ket{01})) &= \\
+        \frac{1}{\sqrt{2}} ((\cos(\frac{\theta}{2})- i\sin(\frac{\theta}{2})) \ket{00} + (\cos(\frac{\theta}{2}) - i\sin(\frac{\theta}{2})) \ket{01}) &= \\
+        \frac{1}{\sqrt{2}} (e^{-i\frac{\theta}{2}} \ket{00} + e^{-i\frac{\theta}{2}} \ket{01}) &= \\
+        \frac{e^{-i\frac{\theta}{2}}}{\sqrt{2}} (\ket{00} + \ket{01}) &= \\
+        \frac{e^{-i\frac{\theta}{2}}}{\sqrt{2}} \ket{0+}
+    \end{align*}
+
+    On the other hand if $\ket{1+}$ is applied then:
+    \begin{align*}
+        \ket{1+} = \frac{1}{\sqrt{2}} (\ket{10} + \ket{11}) &\rightarrow \\
+        \frac{1}{\sqrt{2}} ((\cos(\frac{-\theta}{2})\ket{10} - i\sin(\frac{-\theta}{2}) \ket{11}) + (- i\sin(\frac{-\theta}{2})\ket{10} + \cos(\frac{-\theta}{2})\ket{11})) &= \\
+        \frac{1}{\sqrt{2}} ((\cos(\frac{-\theta}{2})- i\sin(\frac{-\theta}{2})) \ket{10} + (\cos(\frac{-\theta}{2}) - i\sin(\frac{-\theta}{2})) \ket{11}) &= \\
+        \frac{1}{\sqrt{2}} (e^{i\frac{\theta}{2}} \ket{10} + e^{i\frac{\theta}{2}} \ket{11}) &= \\
+        \frac{e^{i\frac{\theta}{2}}}{\sqrt{2}} (\ket{10} + \ket{11}) &= \\
+        \frac{e^{i\frac{\theta}{2}}}{\sqrt{2}} \ket{1+}
+    \end{align*}
+
+    Hence we can see that for a first qubit this is equivalent to applying a $R_Z(\theta)$ gate.
+
+    Now we have to dicuss how to create a $\ket{+}$ state. First let's not that all $R_X(\theta)$, CNOT, Toffoli, and X gates
+    can be created from this controlled $R_X(\theta)$ gate (by setting controls to $\ket{1}$ and/or by specific arguments $\theta$).
+
+    The following circuit:
+    \[\Qcircuit @C=1em @R=1em {
+        \lstick{\ket{1}} & \gate{R_X(\frac{\pi}{2})} & \ctrl{1} & \gate{R_X(-\frac{\pi}{2})} & \qw \\
+        \lstick{\ket{0}} & \qw                       & \targ    & \qw                        & \qw
+    }\]
+
+    This corresponds to following matrix multiplication:
+    \begin{align*}
+        \frac{1}{\sqrt{2}}
+        \begin{pmatrix}
+            1 & 0 & i & 0 \\
+            0 & 1 & 0 & i \\
+            i & 0 & 1 & 0 \\
+            0 & i & 0 & 1 \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 1 & 0 \\
+        \end{pmatrix}
+        \frac{1}{\sqrt{2}}
+        \begin{pmatrix}
+            1  & 0  & -i & 0  \\
+            0  & 1  & 0  & -i \\
+            -i & 0  & 1  & 0  \\
+            0  & -i & 0  & 1  \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            0 \\ 0 \\ 1 \\ 0
+        \end{pmatrix} = \\
+        \frac{1}{2}
+        \begin{pmatrix}
+            1 & 0 & i & 0 \\
+            0 & 1 & 0 & i \\
+            i & 0 & 1 & 0 \\
+            0 & i & 0 & 1 \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 1 & 0 \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            -i \\ 0 \\ 1 \\ 0
+        \end{pmatrix} = \\
+        \frac{1}{2}
+        \begin{pmatrix}
+            1 & 0 & i & 0 \\
+            0 & 1 & 0 & i \\
+            i & 0 & 1 & 0 \\
+            0 & i & 0 & 1 \\
+        \end{pmatrix}
+        \begin{pmatrix}
+            -i \\ 0 \\ 0 \\ 1
+        \end{pmatrix} = \\
+        \frac{1}{2}
+        \begin{pmatrix}
+            -i \\ i \\ 1 \\ 1
+        \end{pmatrix}
+    \end{align*}
+
+    Now, we can measure first qubit until we get $\ket{1}$ state. In such case, the second will be in $\ket{+}$ which is required for the implementation of the $R_Z(\theta)$ gate.
+
+    \paragraph{}
+    Since, as shown in a class a sequence of $R_Z$ and $R_X$, can implement any 1-qubit unitary gate they are sufficient to be universal for single qubit operations.
+    Additionally, if we include a Toffoli, we can then implement any Controlled Unitary operation.
+    Hence $R_Z, R_X$ and $CNOT$ is a universal set. Hence the doubly controlled $R_X$ gate is also universal.
+
 \end{homeworkProblem}
 
-\newpage
+\vspace{2cm}
 \begin{homeworkProblem}
     \subsection*{Part (a)}
 
@@ -303,6 +484,44 @@
     \end{align*}
 
     \subsection*{Part (b)}
+
+    First let's note that $e^{-x} > 0$ for all $x \in \mathbb{R}$. \\
+    Hence:
+    \begin{align*}
+        1 &= \\
+        \sum\limits_{i = 0}^0 e^{-i^2} &< \\
+        \sum\limits_{i = 0}^1 e^{-i^2} &< \\
+        \sum\limits_{i = 0}^2 e^{-i^2} &< \\
+        ... &< \\
+        \sum\limits_{i = 0}^\infty e^{-i^2} &< \\
+    \end{align*}
+
+    Next, due to convexity of the function $\sqrt{x} < \sqrt{x + \epsilon}$, where $x \ge 0, \epsilon > 0$.
+
+    Both of these properties will be used in derivation below.
+
+    The probability of a perfect square is:
+    \begin{align*}
+        (\sum\limits_{i = 0}^\infty (\sqrt{\frac{e - 1}{e}}e^{-i^2/2})^2)^\frac{1}{2} &= \\
+        (\frac{e - 1}{e}\sum\limits_{i = 0}^\infty e^{-i^2})^\frac{1}{2} &= \\
+        \sqrt{\frac{e - 1}{e}} (\sum\limits_{i = 0}^\infty e^{-i^2})^\frac{1}{2} &\ge \\
+        0.79 \cdot (\sum\limits_{i = 0}^\infty e^{-i^2})^\frac{1}{2} &= \\
+        0.79 \cdot (e^0 + e^{-1} + e^{-4} + \sum\limits_{i = 0}^\infty e^{-i^2})^\frac{1}{2} &> \\
+        0.79 \cdot (1 + 0.36 + 0.01 + \sum\limits_{i = 0}^\infty e^{-i^2})^\frac{1}{2} &> \\
+        0.79 \cdot 1^\frac{1}{2} &= \\
+        0.79
+    \end{align*}
+
+    Let us calculate:
+    \begin{equation*}
+        \frac{e - 1}{e} \frac{\sqrt{\pi}}{2} < 0.57
+    \end{equation*}
+
+    Hence, overall:
+    \begin{equation*}
+        (\sum\limits_{i = 0}^\infty (\sqrt{\frac{e - 1}{e}}e^{-i^2/2})^2)^\frac{1}{2} > 0.79 > 0.57 > \frac{e - 1}{e} \frac{\sqrt{\pi}}{2}
+    \end{equation*}
+
 
 \end{homeworkProblem}
 \end{document}
