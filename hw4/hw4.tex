@@ -1,0 +1,212 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{qcircuit}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{}
+\rhead{\hmwkClass}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Problem \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Homework\ \#1}
+\newcommand{\hmwkDueDate}{April 28, 2020}
+\newcommand{\hmwkClass}{Intorduction to Quantum Computing}
+\newcommand{\hmwkAuthorName}{Jakub Filipek}
+
+%
+% Title Page
+%
+
+\title{
+    % \vspace{in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[1]{\frac{\mathrm{d}}{\mathrm{d}x} (#1)}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #1} (#2)}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\newcommand{\bra}[1]{\lstick#1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\qbra}{\bra{\psi}}
+\newcommand{\qket}{\ket{\psi}}
+
+
+\newcommand{\qwxo}[2][-1]{\ar @{-} [#1,0]|*+<2pt,4pt>[Fo]{#2}}
+
+\begin{document}
+
+\maketitle
+
+% \pagebreak
+
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+    There are exactly $n$ Hadamard gates and $n^2$ $R_Z$ gates in a QFT circuit.\\
+    I will assume that Hadamards are implemented in an errorless fashion (this is unrealistic, but the problem, does not specify bounds on Hadamard gate error).
+
+    \begin{align*}
+        \norm{F_{2^n} - \widetilde{F}_{2^n}(\theta)} &= \norm{n^2R_Z(\theta) - n^2 \widetilde{R}_Z(\theta)} \\
+        &= n^2 \norm{R_Z(\theta) - \widetilde{R}_Z(\theta)} \\
+        \le n^2 \Delta
+    \end{align*}
+
+    Since $\Delta \in O(\frac{\epsilon}{n^2})$, we can choose set $\epsilon = \frac{1}{k} n^2 \Delta$, where $k > 1$ (this is stronger that standard big-$O$ requirement).
+
+    This means that we can choose $\epsilon$ to be tuned (by choosing $k$) to be exactly:
+    \begin{align*}
+        \norm{F_{2^n} - \widetilde{F}_{2^n}(\theta)} &= \epsilon \\
+        &= \frac{1}{k} n^2 \Delta \\
+        &\le n^2 \Delta
+    \end{align*}
+
+    Hence such implementation is possible.
+
+    \subsection*{Part (b)}
+    Firstly let us note that an Adder contains 2 QFT circuits, and an additional set of $n^2$ $R_Z$ gates.
+    Hence, there is total of $3n^2$ $R_Z$ gates.
+
+    \begin{align*}
+        \norm{ADD - \widetilde{ADD}} &= \norm{3n^2R_Z - 3n^2\widetilde{R}_Z} \\
+        &= 3n^2\norm{R_Z - \widetilde{R}_Z} \\
+        &\le 3n^2 \Delta
+    \end{align*}
+
+    Let us set:
+    $\epsilon = \frac{\Delta}{3n^2}$
+
+    Then:
+    \begin{equation*}
+        \norm{ADD - \widetilde{ADD}} \le \epsilon
+    \end{equation*}
+
+    Note that $\max_\qket |(R_Z(\theta) - R_Z(\theta))\qket|$ can be at most $2$.
+    This is because we are taking the difference between two unit vectors,
+    so the maximum difference if they are anti-parallel to each other, in which case it is equal to $2$.
+    Hence we can assume $\Delta$ is at most $2$.
+
+    Hence:
+    \begin{equation*}
+        \epsilon \le \frac{2}{3n^2} < 1
+    \end{equation*}
+
+    Since $n^2 \ge 1$
+
+    Aggregating above equations we get:
+    \begin{equation*}
+        \norm{ADD - \widetilde{ADD}} \le \epsilon < 1
+    \end{equation*}
+
+    \subsection*{Part (c)}
+
+    
+\end{homeworkProblem}
+\end{document}
