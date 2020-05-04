@@ -153,8 +153,10 @@
     There are exactly $n$ Hadamard gates and $n^2$ $R_Z$ gates in a QFT circuit.\\
     I will assume that Hadamards are implemented in an errorless fashion (this is unrealistic, but the problem, does not specify bounds on Hadamard gate error).
 
+    Lastly, let's note that when gates are applied the error scales linearly with number of gates applied.
+
     \begin{align*}
-        \norm{F_{2^n} - \widetilde{F}_{2^n}(\theta)} &= \norm{n^2R_Z(\theta) - n^2 \widetilde{R}_Z(\theta)} \\
+        \norm{F_{2^n} - \widetilde{F}_{2^n}(\theta)} &\le \norm{n^2R_Z(\theta) - n^2 \widetilde{R}_Z(\theta)} \\
         &= n^2 \norm{R_Z(\theta) - \widetilde{R}_Z(\theta)} \\
         \le n^2 \Delta
     \end{align*}
@@ -206,7 +208,60 @@
     \end{equation*}
 
     \subsection*{Part (c)}
+    Firstly let us note that worst case implementation of $\widetilde{ADD}$ will have error of $\epsilon$ in the state space.
 
-    
+    Now let us consider, what would be the worst case impact of error $\epsilon$ in the state space on the measured number.
+    Since, both $\ket{x}$ and $\ket{y}$ have $n$ bits, their most significant bit represents power of $2^{n-1}$.
+
+    This also represents the highest error in the number space, since if we make a mistake we would be $2^{n-1}$ away from true answer.
+    Hence, let:
+    \begin{align*}
+        ADD\ket{x}\ket{y} \rightarrow \ket{x}\ket{a} \\
+        \widetilde{ADD}\ket{x}\ket{y} \rightarrow \ket{x}\ket{\widetilde{a}}
+    \end{align*}
+
+    For discrete gradients the variance within a range can be maximized if there are only 2 observations possible, but they are maximally apart.
+    Hence let:
+    \begin{align*}
+        \ket{a} = \begin{pmatrix}
+            0 \\ \vdots \\ 1 \\ \vdots \\ 0
+        \end{pmatrix} & &
+        \ket{\widetilde{a}} = \begin{pmatrix}
+            0 \\ \vdots \\ 1 - \frac{\epsilon}{2} \\ \vdots \\ \frac{\epsilon}{2} \\ \vdots \\ 0
+        \end{pmatrix} \\
+    \end{align*}
+
+    Where $1 - \frac{\epsilon}{2}$ in $\ket{\widetilde{a}}$ is at the same index as the $1$ in $\ket{a}$,
+    and $\frac{\epsilon}{2}$ is $2^{n - 1}$ indexes away from the previously mentioned elements (this can be either above or below them).
+
+    Without loss of generality let us assume that $z$ is the index of $1 - \frac{\epsilon}{2}$, and that it's $\le 2^{n-1} - 1$.
+    This way we can assume that index of $\frac{\epsilon}{2}$ is $z + 2^{n-1}$.
+    In general, if z does not satisfy this bound we can just switch the computation below with minus sign, which doesn't change the overall bound.
+
+    Hence, the overall variance will be:
+    \begin{align*}
+        Var(\widetilde{ADD}) &= \sum\limits_x P(x)f(x)^2 - (P(x)f(x))^2 \\
+        &= ((1 - \frac{\epsilon}{2})z^2 - ((1 - \frac{\epsilon}{2})z)^2) + ((\frac{\epsilon}{2})(z + 2^{n - 1})^2 - (\frac{\epsilon}{2}(z + 2^{n - 1}))^2) \\
+        &= z^2((1 - \frac{\epsilon}{2}) - (1 - \epsilon + \frac{\epsilon^2}{4})) + (z + 2^{n - 1})^2(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &= z^2(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) + (z + 2^{n - 1})^2(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &= (z^2 + (z + 2^{n - 1})^2)(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &= (2z^2 + z2^n + 2^{2n - 2})(\frac{\epsilon}{2} - \frac{\epsilon^2}{4})
+    \end{align*}
+
+    Large values of $z$ maximize the above equation. However, since it is bounded by $2^{n-1} - 1$:
+    \begin{align*}
+        Var(\widetilde{ADD}) &= (2z^2 + z2^n + 2^{2n - 2})(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &\le (2(2^{n-1} - 1)^2 + (2^{n-1} - 1)2^n + 2^{2n - 2})(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &= (2(2^{2n-2} - 2^{n} + 1) + 2^{2n-1} - 2^n + 2^{2n - 2})(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &= (2^{2n-1} - 2^{n + 1} + 2 + 2^{2n-1} - 2^n + 2^{2n - 2})(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &= (2^{2n} + 2^{2n - 2} - 2^n - 2^{n + 1} + 2)(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &\le (2^{2n} + 2^{2n - 2})(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &\le (2 \cdot 2^{2n})(\frac{\epsilon}{2} - \frac{\epsilon^2}{4}) \\
+        &= 2^{2n}(\epsilon - \frac{\epsilon^2}{2}) \\
+        &\le 2^{2n} (\epsilon + \frac{\epsilon^2}{4}) \\
+        &\le 2^{2n} 4\epsilon(1 + \frac{\epsilon}{4})
+    \end{align*}
+
+    \subsection*{Part (d)}
 \end{homeworkProblem}
 \end{document}
