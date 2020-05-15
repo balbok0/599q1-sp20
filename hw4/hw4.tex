@@ -9,6 +9,15 @@
 \usepackage[plain]{algorithm}
 \usepackage{algpseudocode}
 \usepackage{qcircuit}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=purple,
+}
+
+\urlstyle{same}
 
 \usetikzlibrary{automata,positioning}
 
@@ -88,7 +97,7 @@
 %
 
 \newcommand{\hmwkTitle}{Homework\ \#1}
-\newcommand{\hmwkDueDate}{April 28, 2020}
+\newcommand{\hmwkDueDate}{Star Wars Day 2020}
 \newcommand{\hmwkClass}{Intorduction to Quantum Computing}
 \newcommand{\hmwkAuthorName}{Jakub Filipek}
 
@@ -179,33 +188,23 @@
     \begin{align*}
         \norm{ADD - \widetilde{ADD}} &= \norm{3n^2R_Z - 3n^2\widetilde{R}_Z} \\
         &= 3n^2\norm{R_Z - \widetilde{R}_Z} \\
-        &\le 3n^2 \Delta
+        &\le 3n^2 \Delta \\
+        &\le 3n^2 \frac{\epsilon}{3n^2} \\
+        &= \epsilon \\
     \end{align*}
 
-    Let us set:
-    $\epsilon = \frac{\Delta}{3n^2}$
+    Using that $\Delta \in O(\frac{\epsilon}{n^2})$.
 
     Then:
     \begin{equation*}
         \norm{ADD - \widetilde{ADD}} \le \epsilon
     \end{equation*}
 
-    Note that $\max_\qket |(R_Z(\theta) - R_Z(\theta))\qket|$ can be at most $2$.
-    This is because we are taking the difference between two unit vectors,
-    so the maximum difference if they are anti-parallel to each other, in which case it is equal to $2$.
-    Hence we can assume $\Delta$ is at most $2$.
-
-    Hence:
-    \begin{equation*}
-        \epsilon \le \frac{2}{3n^2} < 1
-    \end{equation*}
-
-    Since $n^2 \ge 1$
-
-    Aggregating above equations we get:
-    \begin{equation*}
-        \norm{ADD - \widetilde{ADD}} \le \epsilon < 1
-    \end{equation*}
+    \paragraph*{}
+    For the second part
+    $\Delta \in O(\frac{\epsilon}{n^2})$,
+    implies that $\epsilon \ge \frac{1}{k}\Delta n^2$, and since $n$ can be arbitrarily big, while $0 < \Delta \le 2$, the $k$ would have to be $\propto \frac{1}{n^2}$
+    for $\epsilon < 1$, which I do not know how to prove in such case.
 
     \subsection*{Part (c)}
     Firstly let us note that worst case implementation of $\widetilde{ADD}$ will have error of $\epsilon$ in the state space.
@@ -263,5 +262,79 @@
     \end{align*}
 
     \subsection*{Part (d)}
+    Let $U \in \{ADD, \widetilde{ADD}\}$. Then for an arbitrary state $\qket$ we can perform a modified swap test:
+    \[\Qcircuit @C=1em @R=1em {
+        \lstick{\ket{0}} & \qw              & \gate{H} & \qw         & \gate{H} & \meter & \qw \\
+        \lstick{\qket}   & \multigate{1}{U} & \qw      & \qswap \qwx & \qw      & \qw    & \qw \\
+        \lstick{\ket{0}} & \ghost{U}        & \qw      & \qswap \qwx & \qw      & \qw    & \qw
+    }\]
+
+    Note that the part after $U$ gate is just a SWAP test.
+    There are two cases:
+    \begin{itemize}
+        \item If $U = ADD$ then, after $U$ we will have state $\ket{0}\qket\qket$, which,
+            after swap test will result in $P(0) = 1$
+        \item If $U = ADD$ then, after $U$ we will have state $a\ket{0}\qket\qket + b\ket{0}\qket\ket{\epsilon'}$,
+            where length of $\ket{\epsilon'}$ is at most $\epsilon$. Note that $\ket{\epsilon'}$ is orthogonal to $\qket$,
+            since if there exists a component of it which is proportional to $\qket$ we can just include it in the $\qket$ hence increase ratio of $a$ to $b$ (described in next sentences).
+            Hence $a = \frac{|\qket|}{\sqrt{|\qket|^2 + |\ket{\epsilon'}|^2}} \ge \frac{1}{\sqrt{1 + \epsilon^2}}$. Similarly $b \le \frac{\epsilon}{\sqrt{1 + \epsilon^2}}$.
+            Hence in this case $P(0) \ge \frac{1}{2} + \frac{1 + \epsilon \langle\epsilon'\qket}{2\sqrt{1 + \epsilon^2}} = \frac{1}{2} + \frac{1}{2\sqrt{1 + \epsilon^2}}$.
+        \end{itemize}
+
+    Note that, unless $\epsilon = 0$ (i.e. there is no error), then $U = ADD$ is more probable, since $\frac{1}{2} > \frac{1}{2\sqrt{1 + \epsilon^2}}$.
+    This can be directly seen from Bayes Theorem:
+    \begin{align*}
+        P(ADD | 0) &= \frac{P(0 | ADD) P(ADD)}{P(0 | ADD) P(ADD) + P(0 | \widetilde{ADD}) P(\widetilde{ADD})} \\
+            &= \frac{P(ADD)}{P(ADD) + (\frac{1}{2} + \frac{1}{2\sqrt{1 + \epsilon^2}})P(\widetilde{ADD})} \\
+            &= \frac{2}{3 + \frac{1}{\sqrt{1 + \epsilon^2}}} & \text{Assuming: } P(ADD) = P(\widetilde{ADD}) \\
+            &\in [\frac{1}{2}, \frac{2}{3}] & \text{For: } 0 \le \epsilon \le 1
+    \end{align*}
+
+    In the worst case scenario (for distinguishing between the two operations), there is no error (which means the implementation is great).
+    Hence, the $P(0 | ADD) = P(0 | \widetilde{ADD})$, and $P(ADD | 0) = \frac{1}{2}$ (under above assumptions).
+    Then our best option is a random guess and our success rate is 50\%.
+
+    \paragraph*{}
+    In the best case, and worst implementation: $P(ADD | 0) = \frac{2}{3}$. This means that we should guess ADD if we see 0, and $\widetilde{ADD}$ if we see 1.
+    In that case our success rate is 66\%.
+\end{homeworkProblem}
+
+\vspace{2cm}
+\begin{homeworkProblem}
+    For the project I thought of implementing a Quantum Reinforcement Learning or Quantum Gradient Descent.
+
+    \begin{itemize}
+        \item The idea for Reinforcement Learning was mentioned in a talk at
+            \href{https://quics.umd.edu/content/monday-session-september-24-2018}{Quantum Machine Learning Workshop in 2018}
+            called "A Route towards Quantum-Enhanced Artificial Intelligence" by Vedran Dunjko.
+
+            I am planning on reproducing the experiment in a relatively simple classical environment with a quantum agent.
+            This way I would be able to learn more in depth about Qubitization and the Grover Search, as well as present an
+            interesting application of both of these techniques in machine learning.
+
+            Hence the problem would be to teach an agent such that it can efficiently solve a set of steps Maze as described in
+            \href{https://youtu.be/U90zY_7LXww?t=1550}{the talk at around 26 mins}. This should be a system small enough to efficiently simulate,
+            while showing a lot of edge cases.
+
+        \item The Gradient Descent is something I believe would be extremely interesting to do in conjuction to the \textit{qml} project,
+              since it would allow for an additional place to have quantum computing accelerate learning.
+
+              The idea is basically outlined in \href{https://youtu.be/574nu_cUjm4?t=1368}{this talk} starting at about 23rd minute.
+              I would attempt to implement \href{https://arxiv.org/abs/quant-ph/0405146}{Jordan's algorithm} and compare it to a
+              vanilla classical SGD. The goal would be to try to learn a simple convex function (maybe with a local minimum),
+              and then try to introduce some noise to the function itself, maybe a non-ideal black-box query.
+
+              If time allows I would try to improve it by first including improvements to the gradient descent by using Grover Search.
+
+              I mostly choose this problem, because quantum gradient descent is something that I wanted to learn and implement from start
+              of the research project, and it seems that the final project for this class would be an ideal moment to do it. That being said I
+              might be significantly underestimating amount of time that goes into either of these projects.
+
+              Personally, I would prefer to try doing Gradient Descent, mostly because I can ask you directly for help (since it was your talk).
+              However, I would like to hear your feedback on whether it is a feasible final project.
+    \end{itemize}
+    As of the code, I am planning on writing it in either numpy (using linear algebra), qiskit or Q\#.
+    Numpy would definitely be the simplest to modify and customize, while other two would provide a more-realistic quantum interface,
+    with qiskit possibly allow for actual tests on free tier of IBM Q.
 \end{homeworkProblem}
 \end{document}
