@@ -1,0 +1,263 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{qcircuit}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=purple,
+}
+
+\urlstyle{same}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{}
+\rhead{\hmwkClass}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Problem \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Homework\ \#5}
+\newcommand{\hmwkDueDate}{May 15th 2020}
+\newcommand{\hmwkClass}{Intorduction to Quantum Computing}
+\newcommand{\hmwkAuthorName}{Jakub Filipek}
+
+%
+% Title Page
+%
+
+\title{
+    % \vspace{in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[1]{\frac{\mathrm{d}}{\mathrm{d}x} (#1)}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #1} (#2)}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\newcommand{\bra}[1]{\lstick#1|}
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\qbra}{\bra{\psi}}
+\newcommand{\qket}{\ket{\psi}}
+
+
+\newcommand{\qwxo}[2][-1]{\ar @{-} [#1,0]|*+<2pt,4pt>[Fo]{#2}}
+
+\begin{document}
+
+\maketitle
+
+% \pagebreak
+
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+
+    \subsection*{Part (b)}
+\end{homeworkProblem}
+
+\vspace{2cm}
+\begin{homeworkProblem}
+    \subsection*{Part (a)}
+    Let $\qket = a\ket{0} + b\ket{1}$
+
+    Then:
+    \begin{align*}
+        a\ket{00} + b\ket{01} &\xrightarrow{e^{-iX\theta}, I} \\
+        a\cos(\theta)\ket{00} - a i \sin(\theta)\ket{10} + b \cos(\theta) \ket{01} - b i \sin(\theta)\ket{11} &\xrightarrow{C(-iX)} \\
+        a\cos(\theta)\ket{00} + a \sin(\theta)\ket{11} + b \cos(\theta) \ket{01} + b \sin(\theta)\ket{10} &\xrightarrow{e^{iX\theta}, I} \\
+        \text{ } \\
+        a\cos^2(\theta)\ket{00} + ai\cos(\theta)\sin(\theta)\ket{10} + \\
+        ai\sin^2(\theta)\ket{01} + a\cos(\theta)\sin(\theta)\ket{11} + \\
+        b\cos^2(\theta)\ket{01} + bi\sin(\theta)\cos(\theta)\ket{11} + \\
+        bi\sin^2(\theta)\ket{00} + b\cos(\theta)\sin(\theta)\ket{10} &= \\
+        \text{ } \\
+        (a\cos^2(\theta) + bi\sin^2(\theta))\ket{00} + \\
+        (ai\sin^2(\theta) + b\cos^2(\theta))\ket{01} + \\
+        (ai\cos(\theta)\sin(\theta) + b\cos(\theta)\sin(\theta))\ket{10} + \\
+        (a\cos(\theta)\sin(\theta) + bi\sin(\theta)\cos(\theta))\ket{11}
+    \end{align*}
+
+    Now let us analyze what happens when we measure $\ket{1}$ in the first qubit.
+    Then the we can see that the probability of the $\ket{0}$ and $\ket{1}$ states respectively in the second register are
+    (up to a renormalization factor, which is the same in both cases):
+    \begin{align*}
+        \ket{0} &: (a^2\cos^2(\theta)\sin^2(\theta) + b^2\cos^2(\theta)\sin^2(\theta)) \\
+        \ket{1} &: (a^2\cos^2(\theta)\sin^2(\theta) + b^2\cos^2(\theta)\sin^2(\theta))
+    \end{align*}
+
+    We can see that these are exactly the same, and hence the amplitudes have to be $\frac{1}{\sqrt{2}}$. Keeping the $i$ one in place,
+    and considering that each term with $a$ came from $\ket{0}$ and $b$ came from $\ket{1}$ we get:
+    \begin{equation*}
+        \frac{1}{\sqrt{2}}
+        \begin{pmatrix}
+            i & 1 \\
+            1 & i \\
+        \end{pmatrix}
+    \end{equation*},
+    which up to a global phase ($-i$) implements:
+    \begin{equation*}
+        e^{-iX\frac{\pi}{4}}
+    \end{equation*}
+
+
+    For the other branch, where second register is $\ket{0}$ let us first compute the normalization factor:
+    \begin{align*}
+        \sqrt{|a\cos^2(\theta) + bi\sin^2(\theta)|^2 + |ai\sin^2(\theta) + b\cos^2(\theta)|^2} &= \\
+        \sqrt{(a^2\cos^4(\theta) + b^2\sin^4(\theta)) + (a^2\sin^4(\theta) + b^2\cos^4(\theta))} &= \\
+        \sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}
+    \end{align*}
+
+    Then the probability of measuring states $\ket{0}$ and $\ket{1}$ are:
+    \begin{align*}
+        \ket{0} &: \frac{a\cos^2(\theta) + ib\sin^2(\theta)}{\sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}} \\
+        \ket{1} &: \frac{ia\sin^2(\theta) + b\cos^2(\theta)}{\sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}}
+    \end{align*}
+
+    Note that $a^2 + b^2 = 1$, since we assume that $\qket$ is properly normalized state.\\
+    Using the previously mentioned fact about how $a$ and $b$ indicate which initial state
+    contributed that part of equation, and hence $a, b$ are not part of the unitary operation, we get:
+    \begin{align*}
+        \frac{1}{\sqrt{\sin^4(\theta) + \cos^4(\theta)}}
+        \begin{pmatrix}
+            \cos^2(\theta) & i\sin^2(\theta) \\
+            i\sin^2(\theta) & \cos^2(\theta) \\
+        \end{pmatrix}
+    \end{align*}
+
+    Note that ():
+    \begin{align*}
+        \frac{\cos^2(\theta)}{\sqrt{\sin^4(\theta) + \cos^4(\theta)}} &= \\
+        \frac{1}{\sqrt{\frac{\sin^4(\theta)}{\cos^4(\theta)} + 1}} &= \\
+        \frac{1}{\sqrt{\tan^4(\theta) + 1}} &= \\
+        \cos(\arctan(\tan^2(\theta))) \\
+        \text{ } \\
+        \frac{\sin^2(\theta)}{\sqrt{\sin^4(\theta) + \cos^4(\theta)}} &= \\
+        \frac{1}{\sqrt{\frac{\cos^4(\theta)}{\sin^4(\theta)} + 1}} &= \\
+        \frac{1}{\sqrt{\cot^4(\theta) + 1}} &= \\
+        \sin(\arctan(\tan^2(\theta)))
+    \end{align*}
+
+    Hence we can write the above operation as:
+    \begin{equation*}
+        \begin{pmatrix}
+            \cos(\arctan(\tan^2(\theta))) & i\sin(\arctan(\tan^2(\theta))) \\
+            i\sin(\arctan(\tan^2(\theta))) & \cos(\arctan(\tan^2(\theta))) \\
+        \end{pmatrix} =
+        e^{i\arctan(\tan^2(\theta))X}
+    \end{equation*}
+
+    Hence, we get what the problem asked us for.\\
+    (Up to a minus sign. I think I might have swapped the $e^{-i\theta X}$ with $e^{i\theta X}$)
+
+    \subsection*{Part (b)}
+
+\end{homeworkProblem}
+\end{document}
