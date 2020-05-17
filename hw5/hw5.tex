@@ -143,7 +143,7 @@
 
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 
-\newcommand{\bra}[1]{\lstick#1|}
+\newcommand{\bra}[1]{\langle#1|}
 \newcommand{\ket}[1]{|#1\rangle}
 \newcommand{\qbra}{\bra{\psi}}
 \newcommand{\qket}{\ket{\psi}}
@@ -159,8 +159,107 @@
 
 \begin{homeworkProblem}
     \subsection*{Part (a)}
+    Any one state error on $a\ket{0}_L + b\ket{1}_L$ (i.e. after the CNOTs) would result in something similar to this:
+    \begin{align*}
+        a\ket{0}_L + b\ket{1}_L &\xrightarrow{I \otimes e^{-iX\theta} \otimes I} \\
+        a\ket{0}(\cos(\theta)\ket{0} - i\sin(\theta)\ket{1})\ket{0} + \\
+        b\ket{1}(- i\sin(\theta)\ket{0} + \cos(\theta)\ket{1})\ket{1}
+    \end{align*}
+
+    Note that we will prove it only for an error on second physical qubit, but due to symmetry, the correction also holds
+    for errors on first and third registers.
+
+    \[\Qcircuit @C=1em @R=1em {
+        & \qw      & \gate{Z} \qwx[1] & \gate{Z} \qwx[2] & \qw              & \qw      & \qw \\
+        & \qw      & \gate{Z}         & \qw              & \gate{Z} \qwx[1] & \qw      & \qw \\
+        & \qw      & \qw              & \gate{Z}         & \gate{Z}         & \qw      & \qw \\
+        & \gate{H} & \ctrl{-2}        & \qw              & \qw              & \gate{H} & \qw \\
+        & \gate{H} & \qw              & \ctrl{-2}        & \qw              & \gate{H} & \qw \\
+        & \gate{H} & \qw              & \qw              & \ctrl{-3}        & \gate{H} & \qw \\
+    }\]
+
+    We see then that for a state:
 
     \subsection*{Part (b)}
+    The 5 qubit Phase flip code can be just an extended version of 3 bit presented in class:
+    \[
+        \Qcircuit @C=1em @R=1em {
+            \lstick{a\ket{0} + b\ket{1}} & \ctrl{1}       & \gate{H} & \qw \\
+            \lstick{\ket{0}}             & \targ          & \gate{H} & \qw \\
+            \lstick{\ket{0}}             & \targ \qwx[-1] & \gate{H} & \qw \\
+            \lstick{\ket{0}}             & \targ \qwx[-1] & \gate{H} & \qw \\
+            \lstick{\ket{0}}             & \targ \qwx[-1] & \gate{H} & \qw \\
+        }
+    \]
+
+    This results in a state:
+    $a\ket{+++++} + b\ket{-----}$
+
+    \paragraph*{}
+    Projectors:
+    \begin{itemize}
+        \item With 0 errors: $\hat{P}_0 = \ket{+++++}\bra{+++++} + \ket{-----}\bra{-----}$
+        \item With 1 error: $\hat{P}_1i = \bigotimes\limits_{j=0}^4 I(1 - \delta_{ij}) + Z\delta_{ij}$,
+            where $i \in [0, 4]$
+        \item With 2 errors: $\hat{P}_2ij = \bigotimes\limits_{k=0}^4 I(1 - \delta_{ik}\delta{jk}) + Z(\delta_{ik} + \delta_{jk})$,
+            where $i, j \in [0, 4]$ and $i \ne j$
+    \end{itemize}
+
+    \subsection*{Part (c)}
+    It was mentioned in the lecture that the difference between phase-flip and bit-flip can be done by exchanging $X \leftrightarrow Z$.
+
+    More formally this happens because for states:
+    \begin{align*}
+        X\ket{+} = \ket{+} \\
+        X\ket{-} = -\ket{-} \\
+    \end{align*}
+    which implies that $\ket{+}, \ket{-}$ are eigenvectors of $X$, with $\lambda = 1, -1$, respectively.
+
+    Hence, in if we have an even number of controlled $X$ gates,
+    then (in the errorless) case we should get $\lambda = 1^4 = (-1)^4 = 1$.
+    However, in case of error we can get $\lambda = -1$.
+
+    Hence let us introduce codes:
+    \begin{itemize}
+        \item $S_1 = XXXXI$
+        \item $S_2 = XXXIX$
+        \item $S_3 = XXIXX$
+        \item $S_4 = XIXXX$
+        \item $S_5 = IXXXX$
+    \end{itemize}
+    Note that $S_i$ checks if there exists an error in any but the $i^{th}$ register.
+
+    For one qubit errors we will have to correct a qubit corresponding to $i^{th}$ code,
+    iff that code has $\lambda = 1$ (there will be only one such register).
+    In other words, four of the stabilizers will have $\lambda = -1$,
+    and one will have $\lambda = 1$.
+
+    For two qubit errors we will have to correct a qubits corresponding to $i^{th}$ codes,
+    iff that code has $\lambda = -1$ (there will be two such registers).
+    In other words, three of the stabilizers will have $\lambda = 1$,
+    and two will have $\lambda = -1$.
+
+
+    Then in general (for one or two qubits) we can take majority sign of the stabilizers,
+    and then correct (by applying $Z$ gate) all registers corresponding to stabilizers with
+    minority sign.
+
+    \subsection*{Part (d)}
+    \[\Qcircuit @C=1em @R=1em {
+        & \qw      & \qw              & \gate{X} \qwx[2] & \gate{X} \qwx[1] & \gate{X} \qwx[1] & \gate{X} \qwx[1] & \qw      & \qw    & \qw \\
+        & \qw      & \gate{X} \qwx[1] & \qw              & \gate{X} \qwx[2] & \gate{X} \qwx[1] & \gate{X} \qwx[1] & \qw      & \qw    & \qw \\
+        & \qw      & \gate{X} \qwx[1] & \gate{X} \qwx[1] & \qw              & \gate{X} \qwx[2] & \gate{X} \qwx[1] & \qw      & \qw    & \qw \\
+        & \qw      & \gate{X} \qwx[1] & \gate{X} \qwx[1] & \gate{X} \qwx[1] & \qw              & \gate{X}         & \qw      & \qw    & \qw \\
+        & \qw      & \gate{X}         & \gate{X}         & \gate{X}         & \gate{X}         & \qw              & \qw      & \qw    & \qw \\
+        & \gate{H} & \ctrl{-1}        & \qw              & \qw              & \qw              & \qw              & \gate{H} & \meter & \cw \\
+        & \gate{H} & \qw              & \ctrl{-2}        & \qw              & \qw              & \qw              & \gate{H} & \meter & \cw \\
+        & \gate{H} & \qw              & \qw              & \ctrl{-3}        & \qw              & \qw              & \gate{H} & \meter & \cw \\
+        & \gate{H} & \qw              & \qw              & \qw              & \ctrl{-4}        & \qw              & \gate{H} & \meter & \cw \\
+        & \gate{H} & \qw              & \qw              & \qw              & \qw              & \ctrl{-6}        & \gate{H} & \meter & \cw \\
+        }\]
+
+        After the measurement the previously described procedure (at the end of part d) of applying a $Z$ gate to registers
+        corresponding to minority sign stabilizers should be done.
 \end{homeworkProblem}
 
 \vspace{2cm}
@@ -172,17 +271,17 @@
     \begin{align*}
         a\ket{00} + b\ket{01} &\xrightarrow{e^{-iX\theta}, I} \\
         a\cos(\theta)\ket{00} - a i \sin(\theta)\ket{10} + b \cos(\theta) \ket{01} - b i \sin(\theta)\ket{11} &\xrightarrow{C(-iX)} \\
-        a\cos(\theta)\ket{00} + a \sin(\theta)\ket{11} + b \cos(\theta) \ket{01} + b \sin(\theta)\ket{10} &\xrightarrow{e^{iX\theta}, I} \\
+        a\cos(\theta)\ket{00} - a \sin(\theta)\ket{11} + b \cos(\theta) \ket{01} - b \sin(\theta)\ket{10} &\xrightarrow{e^{iX\theta}, I} \\
         \text{ } \\
         a\cos^2(\theta)\ket{00} + ai\cos(\theta)\sin(\theta)\ket{10} + \\
-        ai\sin^2(\theta)\ket{01} + a\cos(\theta)\sin(\theta)\ket{11} + \\
+        -ai\sin^2(\theta)\ket{01} - a\cos(\theta)\sin(\theta)\ket{11} + \\
         b\cos^2(\theta)\ket{01} + bi\sin(\theta)\cos(\theta)\ket{11} + \\
-        bi\sin^2(\theta)\ket{00} + b\cos(\theta)\sin(\theta)\ket{10} &= \\
+        -bi\sin^2(\theta)\ket{00} - b\cos(\theta)\sin(\theta)\ket{10} &= \\
         \text{ } \\
-        (a\cos^2(\theta) + bi\sin^2(\theta))\ket{00} + \\
-        (ai\sin^2(\theta) + b\cos^2(\theta))\ket{01} + \\
-        (ai\cos(\theta)\sin(\theta) + b\cos(\theta)\sin(\theta))\ket{10} + \\
-        (a\cos(\theta)\sin(\theta) + bi\sin(\theta)\cos(\theta))\ket{11}
+        (a\cos^2(\theta) - bi\sin^2(\theta))\ket{00} + \\
+        (-ai\sin^2(\theta) + b\cos^2(\theta))\ket{01} + \\
+        (ai\cos(\theta)\sin(\theta) - b\cos(\theta)\sin(\theta))\ket{10} + \\
+        (-a\cos(\theta)\sin(\theta) + bi\sin(\theta)\cos(\theta))\ket{11}
     \end{align*}
 
     Now let us analyze what happens when we measure $\ket{1}$ in the first qubit.
@@ -198,27 +297,27 @@
     \begin{equation*}
         \frac{1}{\sqrt{2}}
         \begin{pmatrix}
-            i & 1 \\
-            1 & i \\
+            i & -1 \\
+            -1 & i \\
         \end{pmatrix}
     \end{equation*},
     which up to a global phase ($-i$) implements:
     \begin{equation*}
-        e^{-iX\frac{\pi}{4}}
+        e^{iX\frac{\pi}{4}}
     \end{equation*}
 
 
     For the other branch, where second register is $\ket{0}$ let us first compute the normalization factor:
     \begin{align*}
-        \sqrt{|a\cos^2(\theta) + bi\sin^2(\theta)|^2 + |ai\sin^2(\theta) + b\cos^2(\theta)|^2} &= \\
+        \sqrt{|a\cos^2(\theta) - bi\sin^2(\theta)|^2 + |-ai\sin^2(\theta) + b\cos^2(\theta)|^2} &= \\
         \sqrt{(a^2\cos^4(\theta) + b^2\sin^4(\theta)) + (a^2\sin^4(\theta) + b^2\cos^4(\theta))} &= \\
         \sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}
     \end{align*}
 
-    Then the probability of measuring states $\ket{0}$ and $\ket{1}$ are:
+    Then the wave functions of states $\ket{0}$ and $\ket{1}$ in second register are are:
     \begin{align*}
-        \ket{0} &: \frac{a\cos^2(\theta) + ib\sin^2(\theta)}{\sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}} \\
-        \ket{1} &: \frac{ia\sin^2(\theta) + b\cos^2(\theta)}{\sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}}
+        \ket{0} &: \frac{a\cos^2(\theta) - ib\sin^2(\theta)}{\sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}} \\
+        \ket{1} &: \frac{-ia\sin^2(\theta) + b\cos^2(\theta)}{\sqrt{(a^2 + b^2)(\sin^4(\theta) + \cos^4(\theta))}}
     \end{align*}
 
     Note that $a^2 + b^2 = 1$, since we assume that $\qket$ is properly normalized state.\\
@@ -227,8 +326,8 @@
     \begin{align*}
         \frac{1}{\sqrt{\sin^4(\theta) + \cos^4(\theta)}}
         \begin{pmatrix}
-            \cos^2(\theta) & i\sin^2(\theta) \\
-            i\sin^2(\theta) & \cos^2(\theta) \\
+            \cos^2(\theta) & -i\sin^2(\theta) \\
+            -i\sin^2(\theta) & \cos^2(\theta) \\
         \end{pmatrix}
     \end{align*}
 
@@ -248,16 +347,42 @@
     Hence we can write the above operation as:
     \begin{equation*}
         \begin{pmatrix}
-            \cos(\arctan(\tan^2(\theta))) & i\sin(\arctan(\tan^2(\theta))) \\
-            i\sin(\arctan(\tan^2(\theta))) & \cos(\arctan(\tan^2(\theta))) \\
+            \cos(\arctan(\tan^2(\theta))) & -i\sin(\arctan(\tan^2(\theta))) \\
+            -i\sin(\arctan(\tan^2(\theta))) & \cos(\arctan(\tan^2(\theta))) \\
         \end{pmatrix} =
-        e^{i\arctan(\tan^2(\theta))X}
+        e^{-i\arctan(\tan^2(\theta))X}
     \end{equation*}
 
-    Hence, we get what the problem asked us for.\\
-    (Up to a minus sign. I think I might have swapped the $e^{-i\theta X}$ with $e^{i\theta X}$)
+    In conculsion we get:
+    \begin{align*}
+        \qket \rightarrow \begin{cases}
+            e^{-i\arctan(\tan^2(\theta))X} \qket & \text{if } x = 0, \\
+            e^{iX\frac{\pi}{4}} \qket & \text{if } x = 1.
+        \end{cases}
+    \end{align*}
+    Hence, we get what the problem asked us for.
 
     \subsection*{Part (b)}
+    We want to implement an inverse of a $e^{iX\frac{\pi}{4}}$. Hence:
+    \begin{align*}
+        (e^{iX\frac{\pi}{4}})^\dagger &= \\
+        (He^{iZ\frac{\pi}{4}}H)^\dagger &= \\
+        (HR_Z(\frac{\pi}{2})H)^\dagger &= \\
+        (HSH)^\dagger &= \\
+        HS^\dagger H &= \\
+        HSSSH \\
+    \end{align*}
+
+    This uses the fact that $S^4 = Z^2 = I$, and since $S^\dagger S = I$, then $S^\dagger = S^3$.
+
+    \subsection*{Part (c)}
+    For $\theta = \frac{\pi}{4}$ we get:
+    \begin{align*}
+        e^{-i\arctan(\tan^2(\frac{\pi}{4}))X} &= \\
+        e^{-i\arctan(1^2)X} &= \\
+        e^{-i\frac{\pi}{4}X}
+    \end{align*}
+
 
 \end{homeworkProblem}
 \end{document}
