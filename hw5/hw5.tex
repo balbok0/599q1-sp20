@@ -159,26 +159,67 @@
 
 \begin{homeworkProblem}
     \subsection*{Part (a)}
+
+
     Any one state error on $a\ket{0}_L + b\ket{1}_L$ (i.e. after the CNOTs) would result in something similar to this:
     \begin{align*}
         a\ket{0}_L + b\ket{1}_L &\xrightarrow{I \otimes e^{-iX\theta} \otimes I} \\
         a\ket{0}(\cos(\theta)\ket{0} - i\sin(\theta)\ket{1})\ket{0} + \\
-        b\ket{1}(- i\sin(\theta)\ket{0} + \cos(\theta)\ket{1})\ket{1}
+        b\ket{1}(- i\sin(\theta)\ket{0} + \cos(\theta)\ket{1})\ket{1} = \\
+        \text{ } \\
+        a\cos(\theta)\ket{000} - ai\sin(\theta)\ket{010} - \\
+        bi\sin(\theta)\ket{101} + b\cos(\theta)\ket{111}\\
     \end{align*}
 
-    Note that we will prove it only for an error on second physical qubit, but due to symmetry, the correction also holds
-    for errors on first and third registers.
-
     \[\Qcircuit @C=1em @R=1em {
-        & \qw      & \gate{Z} \qwx[1] & \gate{Z} \qwx[2] & \qw              & \qw      & \qw \\
-        & \qw      & \gate{Z}         & \qw              & \gate{Z} \qwx[1] & \qw      & \qw \\
-        & \qw      & \qw              & \gate{Z}         & \gate{Z}         & \qw      & \qw \\
-        & \gate{H} & \ctrl{-2}        & \qw              & \qw              & \gate{H} & \qw \\
-        & \gate{H} & \qw              & \ctrl{-2}        & \qw              & \gate{H} & \qw \\
-        & \gate{H} & \qw              & \qw              & \ctrl{-3}        & \gate{H} & \qw \\
+        & \qw      & \gate{Z} \qwx[1] & \gate{Z} \qwx[2] & \qw              & \qw      & \qw    & \qw \\
+        & \qw      & \gate{Z}         & \qw              & \gate{Z} \qwx[1] & \qw      & \qw    & \qw \\
+        & \qw      & \qw              & \gate{Z}         & \gate{Z}         & \qw      & \qw    & \qw \\
+        & \gate{H} & \ctrl{-2}        & \qw              & \qw              & \gate{H} & \meter & \qw \\
+        & \gate{H} & \qw              & \ctrl{-2}        & \qw              & \gate{H} & \meter & \qw \\
+        & \gate{H} & \qw              & \qw              & \ctrl{-3}        & \gate{H} & \meter & \qw \\
     }\]
 
-    We see then that for a state:
+    Let us for example that the first stabilizer code (one with $Z$'s on two first registers).
+
+    Let's also ignore qubit in the third register, since no gates are applied to it by the first stabilizer.
+    Then (starting after first Hadamard, and omitting normalization factors):
+
+    \begin{align*}
+        (\ket{0} + \ket{1})(a\cos(\theta)\ket{00} - ai\sin(\theta)\ket{01} -bi\sin(\theta)\ket{10} + b\cos(\theta)\ket{11}) &\xrightarrow{C(ZZ)} \\
+        \text{ } \\
+        \ket{0}(a\cos(\theta)\ket{00} - ai\sin(\theta)\ket{01} - bi\sin(\theta)\ket{10} + b\cos(\theta)\ket{11}) &+ \\
+        \ket{1}(a\cos(\theta)\ket{00} + ai\sin(\theta)\ket{01} + bi\sin(\theta)\ket{10} + b\cos(\theta)\ket{11}) &\xrightarrow{IIH} \\
+        \text{ } \\
+        \ket{0}(a\cos(\theta)\ket{00} - ai\sin(\theta)\ket{01} - bi\sin(\theta)\ket{10} + b\cos(\theta)\ket{11}) &+ \\
+        \ket{1}(a\cos(\theta)\ket{00} - ai\sin(\theta)\ket{01} - bi\sin(\theta)\ket{10} + b\cos(\theta)\ket{11}) &+ \\
+        \ket{0}(a\cos(\theta)\ket{00} + ai\sin(\theta)\ket{01} + bi\sin(\theta)\ket{10} + b\cos(\theta)\ket{11}) &- \\
+        \ket{1}(a\cos(\theta)\ket{00} + ai\sin(\theta)\ket{01} + bi\sin(\theta)\ket{10} + b\cos(\theta)\ket{11}) &= \\
+        \text{ } \\
+        2\ket{0}(a\cos(\theta)\ket{00} + b\cos(\theta)\ket{11}) - 2\ket{1}(ai\sin(\theta)\ket{01} + bi\sin(\theta)\ket{10})
+    \end{align*}
+
+    Now assume that we measured $\ket{0}$ in the stabilizer. This means that the overall state (after proper normalization)
+    will collapse to $a\ket{000} + b\ket{111}$, which implies that there are no errors.
+
+    On the other hand if we measure $\ket{1}$ in the stabilizer, the state will collapse to $a\ket{01} + b\ket{10}$ (up to a global phase).
+    Hence, $\ket{1}$ implies that there are errors.
+    Then we do the same trick as shown in class, to correct the first state.
+
+    \paragraph*{}
+    However, there are still two things to show. What happens when there is no error for a given stabilizer (i.e. the state is in $a\ket{00} + b\ket{11}$).
+    Then we get:
+    \begin{align*}
+        (\ket{0} + \ket{1})(a\ket{00} + \ket{11}) &\xrightarrow{CZZ} \\
+        (\ket{0} + \ket{1})(a\ket{00} + \ket{11}) &\xrightarrow{IIH} \\
+        \ket{0}(a\ket{00} + \ket{11})
+    \end{align*}
+    Which aligns with the fact that $\ket{0}$ in the stabilizer implies no error in the state.
+
+    \paragraph*{}
+    Lastly, we need to argue that stabilizers are entangled. In other words we cannot measure odd number of $\ket{1}$ in stabilizers.
+    This can seen by the fact that values of stabilizers ($\ket{0} vs. \ket{1}$) are entangled with the same qubits (not exactly the same pairs, but the same qubits in these different pairs).
+    Hence the stabilizers themselves are entangled.
 
     \subsection*{Part (b)}
     The 5 qubit Phase flip code can be just an extended version of 3 bit presented in class:
@@ -199,9 +240,9 @@
     Projectors:
     \begin{itemize}
         \item With 0 errors: $\hat{P}_0 = \ket{+++++}\bra{+++++} + \ket{-----}\bra{-----}$
-        \item With 1 error: $\hat{P}_1i = \bigotimes\limits_{j=0}^4 I(1 - \delta_{ij}) + Z\delta_{ij}$,
+        \item With 1 error: $\hat{P}_{1i} = \bigotimes\limits_{j=0}^4 I(1 - \delta_{ij}) + Z\delta_{ij}$,
             where $i \in [0, 4]$
-        \item With 2 errors: $\hat{P}_2ij = \bigotimes\limits_{k=0}^4 I(1 - \delta_{ik}\delta{jk}) + Z(\delta_{ik} + \delta_{jk})$,
+        \item With 2 errors: $\hat{P}_{2ij} = \bigotimes\limits_{k=0}^4 I(1 - \delta_{ik}\delta{jk}) + Z(\delta_{ik} + \delta_{jk})$,
             where $i, j \in [0, 4]$ and $i \ne j$
     \end{itemize}
 
@@ -353,7 +394,7 @@
         e^{-i\arctan(\tan^2(\theta))X}
     \end{equation*}
 
-    In conculsion we get:
+    In conclusion we get:
     \begin{align*}
         \qket \rightarrow \begin{cases}
             e^{-i\arctan(\tan^2(\theta))X} \qket & \text{if } x = 0, \\
@@ -367,13 +408,10 @@
     \begin{align*}
         (e^{iX\frac{\pi}{4}})^\dagger &= \\
         (He^{iZ\frac{\pi}{4}}H)^\dagger &= \\
-        (HR_Z(\frac{\pi}{2})H)^\dagger &= \\
-        (HSH)^\dagger &= \\
-        HS^\dagger H &= \\
-        HSSSH \\
+        (HR_Z(-\frac{\pi}{2})H)^\dagger &= \\
+        (HS^\dagger H)^\dagger &= \\
+        HSH
     \end{align*}
-
-    This uses the fact that $S^4 = Z^2 = I$, and since $S^\dagger S = I$, then $S^\dagger = S^3$.
 
     \subsection*{Part (c)}
     For $\theta = \frac{\pi}{4}$ we get:
