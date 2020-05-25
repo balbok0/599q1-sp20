@@ -32,24 +32,58 @@ def scale_gate_to_n_qubits(num_qubits: int, gate: np.ndarray, qubit_applied: Uni
     return result
 
 
-def control_gate(control_qubits: int, apply_qubits: int, total_qubits: int):
+def control_gate(control_qubits: Union[Set[int], int], apply_qubits: Union[Set[int], int], total_qubits: int, gate_to_apply: np.ndarray):
+    if not isinstance(control_qubits, set):
+        if isinstance(control_qubits, int):
+            control_qubits = set([control_qubits])
+        else:
+            control_qubits = set(control_qubits)
+    if not isinstance(apply_qubits, set):
+        if isinstance(apply_qubits, int):
+            apply_qubits = set([apply_qubits])
+        else:
+            apply_qubits = set(apply_qubits)
+    if not isinstance(gate_to_apply, np.ndarray):
+        gate_to_apply = np.array(gate_to_apply)
+
+    remaining_qubits = []
+    for i in range(total_qubits):
+        if i not in control_qubits and i not in apply_qubits:
+            remaining_qubits.append(i)
+    remaining_qubits = set(remaining_qubits)
+
+    control_qubits_value = sum([2**control_qubit for control_qubit in control_qubits])
+
+    # Map from placeholders, to indexes where to apply the gate
     map_to_apply = {}
 
-    for i in range(2**control_qubits, 2**total_qubits):
-        i_bytes = "{0:{total_qubits}b}".format(i, total_qubits=total_qubits)
-
+    for i in range(control_qubits_value, 2**total_qubits):
         # Determine whether an index is valid to be controlled
         is_valid = True
-        if (i >> control_qubits) % 2 != 1:  # Controlled qubit is not 1
-            is_valid = False
+        for control_qubit in control_qubits:
+            if (i >> control_qubit) % 2 != 1:  # Controlled qubit is not 1
+                is_valid = False
+                break
 
-        # if is_valid:
-        # print(i >> control_qubits)
-        # print(np.array(i, dtype=bool))
-        print(i)
-        print(i_bytes)
-        print(is_valid)
-        # print(i_bytes[0, 1])
-        pass
+        if is_valid:
+            map_array_idx = 0
+            apply_qubits_value = 0
+            for idx, apply_qubit in enumerate(apply_qubits):
+                if (i >> apply_qubit) % 2 == 1:
+                    map_array_idx += 2 ** idx
+                    apply_qubits_value += 2 ** apply_qubit
 
-control_gate(2, 4, 4)
+            map_key = i - control_qubits_value - apply_qubits_value
+
+            if map_key not in map_to_apply:
+                map_to_apply[map_key] = np.zeros(len(gate_to_apply), dtype=int)
+
+
+            map_to_apply[map_key][map_array_idx] = i
+
+    result = np.identity(2**total_qubits, dtype=complex)
+    for _, idxs in map_to_apply.items():
+        result[np.ix_(idxs, idxs)] = gate_to_apply
+    return result
+
+print(control_gate(0, 2, 3, [[0, 1], [1, 0]]))
