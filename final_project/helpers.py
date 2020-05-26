@@ -9,6 +9,25 @@ H = 1. / np.sqrt(2) * np.array(
     ]
 )
 
+def apply_to_all(num_qubits: int, gate: np.ndarray):
+    r"""Applies the same gate over all of the qubits
+
+    Args:
+        num_qubits (int): Number of qubits in a state
+        gate (np.ndarray): A gate to apply for each qubit (Has to be 2 x 2)
+
+    Returns:
+        np.ndarray: A matrix of size `($$2^{num\_qubits}, 2^{num\_qubits}$$),
+            which corresponds to the provided `gate` applied simultaneously on all qubits.
+    """
+    result = None
+    for _ in num_qubits:
+        if result is None:
+            result = gate
+        else:
+            result = np.kron(result, gate)
+    return result
+
 
 def scale_gate_to_n_qubits(num_qubits: int, gate: np.ndarray, qubit_applied: Union[int, Set[int]]):
     """Applies a series of kronecker products to generate a `2^num_qubits` version of a gate.
@@ -24,11 +43,14 @@ def scale_gate_to_n_qubits(num_qubits: int, gate: np.ndarray, qubit_applied: Uni
     result = None
 
     for idx in range(num_qubits):
-        if idx == qubit_applied:
-            gate_idx = gate
+        if idx in qubit_applied:
+            gate_at_idx = gate
         else:
-            gate_idx = np.identity(2)
-        result = np.kron(result, gate_idx)
+            gate_at_idx = np.identity(2)
+        if result is None:
+            result = gate_at_idx
+        else:
+            result = np.kron(result, gate_at_idx)
     return result
 
 
@@ -86,4 +108,14 @@ def control_gate(control_qubits: Union[Set[int], int], apply_qubits: Union[Set[i
         result[np.ix_(idxs, idxs)] = gate_to_apply
     return result
 
-print(control_gate(0, 2, 3, [[0, 1], [1, 0]]))
+
+def r_k(k: int, pow: int = 1):
+    i = np.complex(0, 1)
+
+    return [
+        [1, 0],
+        [0, np.exp(2 * np.pi * i * pow / 2**k)]
+    ]
+
+
+# print(control_gate(0, 2, 3, [[0, 1], [1, 0]]))
