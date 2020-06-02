@@ -84,8 +84,3 @@ def qft2(input_state: np.ndarray, start: int = 0, end: int = None):
             result,
             input_state
         )
-
-# print(qft1(3) @ np.array([0, 0, 0, 1, 0, 0, 0, 0]))
-print(qft2([0, 0, 1, 0, 0, 0, 0, 0]))
-print(qft2([0, 0, 0, 0, 0, 0, 0, 0], start=0, end=2))
-
