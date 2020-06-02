@@ -118,4 +118,111 @@ def r_k(k: int, pow: int = 1):
     ]
 
 
-# print(control_gate(0, 2, 3, [[0, 1], [1, 0]]))
+def bitstring_to_num(arr):
+    """Little Endian (i.e. 001 = 1 and 100 = 4)
+    """
+    result = 0
+    for idx, elem in enumerate(arr[::-1]):
+        result += elem * 2**idx
+    return result
+
+
+def num_to_bitstring(num, size):
+    """Little Endian (i.e. 001 = 1 and 100 = 4)
+    """
+    num = num % (2**size)
+    result = np.zeros(size)
+    for idx in range(size):
+        if (num >> idx) % 2 == 1:
+            result[size - idx - 1] = 1
+    return result
+
+
+def square_a_state(idx_of_state: int, size_of_out, size_of_dim, start, end, size_of_state, displacements):
+    inp = num_to_bitstring(idx_of_state, size_of_state)
+
+    result = 0
+    for disp_idx, idx in enumerate(range(start, end - size_of_out, size_of_dim)):
+        result_idx = bitstring_to_num(inp[idx:idx + size_of_dim]) * 1.0 / 2**size_of_dim - displacements[disp_idx]
+        result += result_idx ** 2
+
+    clean_result = num_to_bitstring(int(result * 2**size_of_out), size_of_out)
+    inp[end - size_of_out:end] = np.logical_xor(inp[end - size_of_out:end], clean_result)
+
+    result = bitstring_to_num(inp)
+    return result
+
+
+SUM_SQUARES = {}
+
+def sum_squares(input_state: np.ndarray, size_out: int, dim_num: int = 1,  start: int = 0, end: int = None, displacements: Union[float, Set[float]] = 0.0):
+    global SUM_SQUARES
+    num_qubits_total = int(np.log2(len(input_state)))
+
+    if end is None:
+        end = num_qubits_total
+
+    size_op = end - start
+
+    size_in = size_op - size_out
+
+    assert size_in % dim_num == 0
+
+    size_of_dim = size_in // dim_num
+
+    if not hasattr(displacements, 'len'):
+        displacements = [displacements] * dim_num
+    else:
+        displacements = list(displacements)
+        assert len(displacements) == dim_num
+
+    key_to_global_dict = f'{size_in}_{size_out}_{size_of_dim}_{displacements}'
+    if key_to_global_dict not in SUM_SQUARES:
+        result_op = np.zeros((2**size_op, 2**size_op), dtype=complex)
+        power_diff = num_qubits_total - end
+        for i in range(2**size_op):
+            idx = int(square_a_state(
+                idx_of_state=i << power_diff,
+                size_of_out=size_out,
+                size_of_dim=size_of_dim,
+                start=start,
+                end=end,
+                size_of_state=size_op,
+                displacements=displacements))
+            result_op[i, idx] = 1
+        SUM_SQUARES[key_to_global_dict] = result_op
+    else:
+        result_op = SUM_SQUARES[key_to_global_dict]
+
+    if size_op == num_qubits_total:
+        return np.matmul(result_op, input_state)
+    else:
+        result = None
+        idx = 0
+        while idx < num_qubits_total:
+            if idx == start:
+                gate_at_idx = result_op
+                idx = end
+            else:
+                gate_at_idx = np.identity(2)
+                idx += 1
+            if result is None:
+                result = gate_at_idx
+            else:
+                result = np.kron(result, gate_at_idx)
+        return np.matmul(
+            result,
+            input_state
+        )
+
+
+if __name__ == "__main__":
+    np.set_printoptions(threshold=np.inf)
+    input_state = np.zeros(2**5)  # 5 qubits
+    input_state[5] = 1
+    print(sum_squares(
+        input_state=input_state,
+        size_out=1,
+        dim_num=2,
+        start=0
+    ))
