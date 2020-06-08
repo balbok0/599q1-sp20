@@ -158,10 +158,10 @@ def square_a_state(idx_of_state: int, size_of_out, size_of_dim, start, end, size
     result = 0
     relative_end = end - start
     for disp_idx, idx in enumerate(range(0, relative_end - size_of_out, size_of_dim)):
-        result_idx = bitstring_to_num(inp[idx:idx + size_of_dim]) * 1.0 / 2**size_of_dim - displacements[disp_idx]
+        result_idx = bitstring_to_num(inp[idx:idx + size_of_dim]) * 1.0 - displacements[disp_idx]
         result += result_idx ** 2
 
-    clean_result = num_to_bitstring(int(result * 2**size_of_out), size_of_out)
+    clean_result = num_to_bitstring(int(result), size_of_out)
     inp[relative_end - size_of_out:relative_end] = add_bit_strings(inp[relative_end - size_of_out:relative_end], clean_result)
 
     result = bitstring_to_num(inp)
