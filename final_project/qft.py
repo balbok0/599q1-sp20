@@ -9,6 +9,7 @@ import timeit
 i = np.complex(0, 1)
 
 QFTs = {}
+QFTs_inv = {}
 
 def qft1(num_qubits: int):
     """
@@ -41,8 +42,8 @@ def qft1(num_qubits: int):
     return swap_gate @ result
 
 
-def qft2(input_state: np.ndarray, start: int = 0, end: int = None):
-    global QFTs
+def qft2(input_state: np.ndarray, start: int = 0, end: int = None, inverse: bool = False):
+    global QFTs, QFTs_inv
 
     num_qubits_total = int(np.log2(len(input_state)))
 
@@ -63,14 +64,21 @@ def qft2(input_state: np.ndarray, start: int = 0, end: int = None):
         # This QFT was already calculated, do nothing
         pass
 
+    if not inverse:
+        result_op = QFTs[size_qft]
+    else:
+        if size_qft not in QFTs_inv:
+            QFTs_inv[size_qft] = QFTs[size_qft].conj().T
+        result_op = QFTs_inv[size_qft]
+
     if size_qft == num_qubits_total:
-        return np.matmul(QFTs[size_qft], input_state)
+        return np.matmul(result_op, input_state)
     else:
         result = None
         idx = 0
         while idx < num_qubits_total:
             if idx == start:
-                gate_at_idx = QFTs[size_qft]
+                gate_at_idx = result_op
                 idx = end
             else:
                 gate_at_idx = np.identity(2)

@@ -138,16 +138,31 @@ def num_to_bitstring(num, size):
     return result
 
 
+def add_bit_strings(*args):
+    if len(args) == 0:
+        raise ValueError('No Argument given.')
+    elif len(args) == 1:
+        return args[0]
+    else:
+        max_len = max([len(x) for x in args])
+        result = 0
+        for x in args:
+            result += bitstring_to_num(x)
+        result = int(result) % 2**max_len
+        return num_to_bitstring(result, max_len)
+
+
 def square_a_state(idx_of_state: int, size_of_out, size_of_dim, start, end, size_of_state, displacements):
     inp = num_to_bitstring(idx_of_state, size_of_state)
 
     result = 0
-    for disp_idx, idx in enumerate(range(start, end - size_of_out, size_of_dim)):
+    relative_end = end - start
+    for disp_idx, idx in enumerate(range(0, relative_end - size_of_out, size_of_dim)):
         result_idx = bitstring_to_num(inp[idx:idx + size_of_dim]) * 1.0 / 2**size_of_dim - displacements[disp_idx]
         result += result_idx ** 2
 
     clean_result = num_to_bitstring(int(result * 2**size_of_out), size_of_out)
-    inp[end - size_of_out:end] = np.logical_xor(inp[end - size_of_out:end], clean_result)
+    inp[relative_end - size_of_out:relative_end] = add_bit_strings(inp[relative_end - size_of_out:relative_end], clean_result)
 
     result = bitstring_to_num(inp)
     return result
@@ -182,14 +197,14 @@ def sum_squares(input_state: np.ndarray, size_out: int, dim_num: int = 1,  start
         power_diff = num_qubits_total - end
         for i in range(2**size_op):
             idx = int(square_a_state(
-                idx_of_state=i << power_diff,
+                idx_of_state=i,
                 size_of_out=size_out,
                 size_of_dim=size_of_dim,
                 start=start,
                 end=end,
                 size_of_state=size_op,
                 displacements=displacements))
-            result_op[i, idx] = 1
+            result_op[idx, i] = 1
         SUM_SQUARES[key_to_global_dict] = result_op
     else:
         result_op = SUM_SQUARES[key_to_global_dict]
@@ -218,11 +233,12 @@ def sum_squares(input_state: np.ndarray, size_out: int, dim_num: int = 1,  start
 
 if __name__ == "__main__":
     np.set_printoptions(threshold=np.inf)
-    input_state = np.zeros(2**5)  # 5 qubits
-    input_state[5] = 1
-    print(sum_squares(
+    input_state = np.zeros(2**9)  # 5 qubits
+    input_state[480 + 16] = 1
+    result = sum_squares(
         input_state=input_state,
-        size_out=1,
+        size_out=2,
         dim_num=2,
-        start=0
-    ))
+        start=2,
+        end=8
+    )
