@@ -8,7 +8,7 @@ else:
     from .qft import qft2
 
 
-def main(d: int, n: int, n_o: int):
+def main(d: int, n: int, n_o: int, displacements = 0.0):
     num_qubits = d * n + n_o
     num_input_qubits = d * n
 
@@ -28,7 +28,8 @@ def main(d: int, n: int, n_o: int):
     blackbox_state = sum_squares(
         input_state=prep_output_state,
         size_out=n_o,
-        dim_num=d
+        dim_num=d,
+        displacements=displacements
     )
 
     # QFT on each register
@@ -38,14 +39,25 @@ def main(d: int, n: int, n_o: int):
         post_qft = qft2(post_qft, start=start_idx, end=start_idx + n)
     # post_qft = qft2(blackbox_state, end=num_input_qubits)
 
-    print(post_qft)
+    # print(post_qft)
     return post_qft
 
 if __name__ == "__main__":
     d = 2
     n = 2
-    n_o = int(np.ceil(np.log2(10 * d * 2**(2*n - 1))))
-    result = main(d, n, n_o)
+    # n_o = int(np.ceil(np.log2(10 * d * 2**(2*n - 1))))
+    n_o = int(np.ceil(np.log2(160 * d * 2**(n - 1))))
+    result = main(d, n, n_o, -1)
 
-    print([float(x * x.conj()) for x in result])
-    print(np.linalg.norm(result))
+    reshape_results = np.reshape(result, (-1, 2**n_o))
+    probabilities = [sum([float(x * x.conj()) for x in y]) for y in reshape_results]
+
+    print(probabilities)
+
+    print(sum(probabilities))
+
+    # print(np.linalg.norm(reshape_results, axis=1))
+    print(reshape_results.shape)
+
+    # print([float(x * x.conj()) for x in result])
+    # print(np.linalg.norm(result))
