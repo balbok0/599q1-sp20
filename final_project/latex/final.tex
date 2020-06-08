@@ -1,0 +1,144 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amsfonts}
+\usepackage{braket}
+\usepackage{graphicx}
+% \usepackage{thmbox}
+\usepackage{amsthm}
+\usepackage{dsfont}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{bm}
+\usepackage{indentfirst}
+\usepackage{qcircuit}
+
+\usepackage[colorlinks,allcolors=blue]{hyperref} % optional
+\usepackage[noabbrev,capitalize,nameinlink]{cleveref}
+
+\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage[style=numeric]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Quantum Gradient Descent via Jordan's Method}
+\author{Jakub Filipek}
+\date{June 2020}
+
+
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\identity}{\mathds{1}}
+
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{fact}{Fact}
+\newtheorem{corr}{Corollary}[section]
+\newtheorem{define}{Definition}
+\newtheorem{problem}{Problem}
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    \noindent Gradient Descent has been a key technique for optimizing many Machine Learning Algorithms.
+    However, due to extremely large number of parameters of modern models (up to $10^{11}$ floating points)
+    this problem has not been widely discussed in Quantum Computing Community.
+    In this project, I will try to implement algorithm presented in~\cite{Jordan_2005}.
+    Additionally I will follow by discussing potential improvements of this paper, as discussed in~\cite{Gily_n_2019}.
+    Both of these are done on example of $f(x) = x^2$, with domain being $[0, 2^{\vec{n}}]$.
+\end{abstract}
+
+% \section{Introduction}
+
+\section{Introduction to Gradient Descent}
+
+Gradient Descent is trying to solve a problem of minimizing (or maximizing) a function:
+\begin{align}
+    \arg \min \limits_x f(x) | x \in X
+\end{align}, where $X$ is a continuos space of numbers (typically in $\mathcal{R}^d$).
+
+Since often finding a global minimum is computationally impossible, a lot of problems reduce to finding local minimum from a given starting point,
+and then repeating an experiment for set number of random starting points. In particular, vanilla gradient descent algorithm looks as follows:
+\begin{algorithm}[h]
+    \SetAlgoLined
+    \KwResult{An approximation of local minima of $f$ for starting point $\pmb{w}$, and dataset $X$}
+    Let $f$ be parametrized by $\pmb{w}$. \;
+    Let $\pmb{w}_0 = \pmb{w}$ \;
+    \For{i = 0 to T}{
+        Let $\nabla_{\pmb{w}} f(X)$ be an average of gradients of $f$ over dataset X, all with respect to $\pmb{w}$ \;
+        $\pmb{w}_{i + 1} = \pmb{w}_i - \alpha \nabla_{\pmb{w}} f(X)$\;
+    }
+    \Return{$\pmb{w}_T$}
+    \caption{Gradient Descent Algorithm}
+    \label{alg:vanilla-grad-desc}
+\end{algorithm}
+
+While this algorithm does not necessarily lead to the local minimum it performs exceptionally well in practice. It also is a basis for a family of
+\textit{gradient descent} algorithms which have been a backbone of last decade's improvements in Machine Learning.
+
+More importantly however, by the above algorithm we can see that we need to calculate the above gradient $O(Td)$ times for each initialization point.
+Additionally if we want to achieve $\epsilon$-precise result we need to have $|X| \in O(\frac{1}{\epsilon^2})$, if sampled randomly.
+
+Hence overall, this naive algorithm will take:
+\begin{align}
+    O(\frac{dTN}{\epsilon^2})
+\end{align}
+gradient calculations, where $N$ is number of random starting points of $\pmb{w}$.
+
+\section{Jordan's Algorithm}
+Jordan Algorithm is still based on a gradient descent as mentioned above,
+however gradient calculation itself it done on quantum device as described in~\cite{Jordan_2005}, which is as follows.
+
+Assume you have access to oracle $O_f: \ket{\pmb{w}}\ket{\pmb{0}} \mapsto \ket{\pmb{w}}\ket{f(\pmb{w})}$, where $\pmb{w} = \begin{pmatrix}
+    w_1, w_2, w_3, \hdots, w_d
+\end{pmatrix}$.
+Let $n$ be the number of qubits of each $w_i$, and $n_o$ be the number of qubits in the second register (i.e. one with $\pmb{0}$).
+
+% TODO: Finish This circuit
+\begin{figure}[h]
+    \[\Qcircuit @C=1em @R=1em {
+        & \lstick{\ket{0}} & \gate{H} & \multigate{2}{W^{2^i}} & \multigate{3}{O_f} & \qw    & \qw      & \qw \\
+        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
+        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
+        & \lstick{\vdots}  & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
+        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
+        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
+        & \lstick{\ket{0}} & \qw      & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
+        & \lstick{\ket{0}} & \qw      & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
+        & \lstick{\ket{0}} & \gate{X} & \qw                    & \ghost{O_f}        & \meter & \gate{E} & \cw \\
+    }\]
+\end{figure}
+\section{Numerical Experiment}
+\subsection{Problem Description}
+\subsection{Implementation}
+\subsection{Results}
+
+\section{Improvements to Jordan's Algorithm}
+\subsection{Different Way of Expressing Jordan's Algorithm}
+\subsection{Amplitude Amplification}
+\subsection{Grover Search}
+\subsection{Additional Improvements}
+\textbf{\textcolor{red}{Fix section title}}
+
+\section{Improvements to Classical Gradient Calculation}
+\subsection{Active Sampling vs. Passive Sampling}
+
+\section{Conclusion}
+% \newpage
+\printbibliography
+\end{document}
+
+
+
+% This is actually the Taylor series for $e^x$; so, substituting, we see:
+
+% \begin{align*}
+%     &= 2 \Big[ \sum_{k = 0}^{\infty} \frac{1}{k!} \Big(\frac{2\lambda t}{N}\Big)^k - 1 - \Big(\frac{2\lambda t}{N}\Big) \Big]
+% \end{align*}
