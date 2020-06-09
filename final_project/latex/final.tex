@@ -58,7 +58,10 @@
 % \section{Introduction}
 
 \section{Introduction to Gradient Descent}
+\label{sec:intro-grad-desc}
 
+\subsection{Gradient Descent}
+\label{subsec:grad-desc}
 Gradient Descent is trying to solve a problem of minimizing (or maximizing) a function:
 \begin{align}
     \arg \min \limits_x f(x) | x \in X
@@ -92,29 +95,120 @@ Hence overall, this naive algorithm will take:
 \end{align}
 gradient calculations, where $N$ is number of random starting points of $\pmb{w}$.
 
+\subsection{Important Technicalities of Gradient Calculation}
+\label{subsec:tech-grad}
+
+Classically, gradient at point $\pmb{w}$ is calculated using standard derivative calculation for each dimension:
+\begin{align}
+    \label{eq:grad1}
+    \nabla_{w_i} &= \frac{f(\pmb{w} + \pmb{h_i}) - f(\pmb{w})}{h} \\
+    \pmb{h_i} &= \begin{pmatrix}
+        0, 0, \hdots, h, \hdots, 0
+    \end{pmatrix} & \text{where $h$ is at index $i$}
+\end{align}
+
+As we can see the $f(\pmb{w})$ can be reused across all dimensions, and hence we require $f$ to be called $d + 1$ times classically.
+
+Alternatively, we can switch Equation~\ref{eq:grad1} to:
+\begin{align}
+    \label{eq:grad2}
+    \nabla_{w_i} &= \frac{f(\pmb{w} + \frac{\pmb{h_i}}{2}) - f(\pmb{w} - \frac{\pmb{h_i}}{2})}{h}
+\end{align}
+which the same definition of $\pmb{h_i}$ as above. This requires $f$ to be called $2d$ times, since nothing can be reused.
+
+The Jordan algorithm calculates gradient using the first method, but has a few inspirations from second method.
+
+Additionally for future use, we can rewrite Equation~\ref{eq:grad1}:
+\begin{align}
+    \label{eq:grad-lemma}
+    f(\pmb{w} + \pmb{h_i}) &= f(\pmb{w}) + h\nabla_{w_i}
+\end{align}
+
 \section{Jordan's Algorithm}
-Jordan Algorithm is still based on a gradient descent as mentioned above,
+\label{sec:jord-alg}
+\subsection{Prerequisites}
+\label{sec:jord-preq}
+In this section I will try to provide a much more explicit explanation of needed function oracle,
+and its interpretation than presented in the original paper.
+
+Firstly, let us define a classical function $f: x \mapsto y$, where both the domain and the range are fixed point numbers (those can be though of as integers divided by some $2^p$ number).
+Let input be $n$-bit precise, and the output to be $2^{n_o}$-bit precise. This means that, for example, if the domain and range are both $[0, 1]$, the distances between distinct inputs and outputs have to be $2^{-n}$ and $2^{-n_o}$, respectively.
+
+For ease of future notation let $2^n = N$ and $2^{n_o} = N_o$.
+
+This allows us to create $f'$ such that $f': x' \mapsto y'$, where $x' \in [0, N]$ and $y' \in [0, N_o]$.
+$f'$ on the other hand can be easily converted into a quantum oracle such that:
+\begin{align}
+    O_f: \ket{x}\ket{a} \mapsto \ket{x}\ket{(a + f'(x)) \mod N_o}
+\end{align}
+
+Let us combine this thinking with the gradient calculation from Equation~\ref{eq:grad2}. Let $x \in [-\frac{l}{2}, \frac{l}{2}]$.
+Then conversion $f \rightarrow f'$ would split $l$ into $N$ integers, and shift $x$ by $\frac{l}{2}$.
+
+Hence corresponding $f(x) = \frac{l}{N}f'(x' + \frac{N}{2})$, or going the other way:
+\begin{equation}
+    \label{eq:func-conversion}
+    f'(x') = \frac{N}{l}f(x - \frac{l}{2}) = \frac{N}{l}f(\frac{l}{N}(x' - \frac{N}{2}))
+\end{equation}
+
+And similarly for the $O_f$ corresponding to the $f'$.
+
+This particular relation between $f, f'$ and $O_f$ is not explicit in~\cite{Jordan_2005},
+and only can be understood by transformations between equations, while the transformation from $f$ to $O_f$ is described as trivial.
+I believe that because of that this paper lacks a lot of clarity and makes it much harder to reproduce experimentally.
+
+\subsection{Algorithm Explanation}
+\label{sec:jord-expl}
+Jordan Algorithm is still based on a vanilla gradient descent as mentioned in Section~\ref{subsec:grad-desc},
 however gradient calculation itself it done on quantum device as described in~\cite{Jordan_2005}, which is as follows.
 
-Assume you have access to oracle $O_f: \ket{\pmb{w}}\ket{\pmb{0}} \mapsto \ket{\pmb{w}}\ket{f(\pmb{w})}$, where $\pmb{w} = \begin{pmatrix}
-    w_1, w_2, w_3, \hdots, w_d
-\end{pmatrix}$.
-Let $n$ be the number of qubits of each $w_i$, and $n_o$ be the number of qubits in the second register (i.e. one with $\pmb{0}$).
+An important note is that this gradient is calculated for $\pmb{w} = \pmb{0}$, but we can just shift any function to center it at $0$ perform this calculation, and then shift it back.
 
-% TODO: Finish This circuit
 \begin{figure}[h]
     \[\Qcircuit @C=1em @R=1em {
-        & \lstick{\ket{0}} & \gate{H} & \multigate{2}{W^{2^i}} & \multigate{3}{O_f} & \qw    & \qw      & \qw \\
-        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
-        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
-        & \lstick{\vdots}  & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
-        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
-        & \lstick{\ket{0}} & \gate{H} & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
-        & \lstick{\ket{0}} & \qw      & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
-        & \lstick{\ket{0}} & \qw      & \ghost{W^{2^i}}        & \ghost{O_f}        & \qw    & \qw      & \qw \\
-        & \lstick{\ket{0}} & \gate{X} & \qw                    & \ghost{O_f}        & \meter & \gate{E} & \cw \\
+        &                 & \gate{H}                    & \qw                        & \multigate{7}{O_f} & \multigate{1}{QFT}         & \qw \\
+        &                 & \gate{H}                    & \qw                        & \ghost{O_f}        & \ghost{QFT}                & \qw
+        \inputgroupv{1}{2}{0.7em}{1.1em}{\ket{w_1}} \\
+        & \lstick{\vdots} & \gate{H^{\otimes (d - 2)n}} & \qw                        & \ghost{O_f}        & \gate{QFT^{\otimes d - 2}} & \qw \\
+        &                 & \gate{H}                    & \qw                        & \ghost{O_f}        & \multigate{1}{QFT}         & \qw \\
+        &                 & \gate{H}                    & \qw                        & \ghost{O_f}        & \ghost{QFT}                & \qw
+        \inputgroupv{4}{5}{0.7em}{1.1em}{\ket{w_{d}}} \\
+        &                 & \qw                         & \multigate{2}{QFT^\dagger} & \ghost{O_f}        & \qw                        & \qw \\
+        &                 & \qw                         & \ghost{QFT^\dagger}        & \ghost{O_f}        & \qw                        & \qw \\
+        &                 & \gate{X}                    & \ghost{QFT^\dagger}        & \ghost{O_f}        & \qw                        & \qw
+        \inputgroupv{6}{8}{0.7em}{2em}{\ket{\pmb{out}}} \\
     }\]
+    \label{qc:jordans-alg}
+    \caption{Circuit Visualization for Jordan's Algorithm}
 \end{figure}
+
+Then the above circuit (where inputs are all $\ket{0}$'s) will generate $\ket{\frac{N}{m}\frac{\partial f}{\partial w_1}}, \ket{\frac{N}{m}\frac{\partial f}{\partial w_2}}, \hdots$.
+
+To show this let us consider the transformations of this circuit:
+\begin{align}
+    \ket{0}^{\otimes nd}\ket{0}^{n_o} &\xrightarrow{H's, X} \\
+    \frac{1}{\sqrt{N^d}} \sum\limits_{w} \ket{\pmb{w}} \ket{\pmb{1}} &\xrightarrow{QFT^\dagger} \\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} &\xrightarrow{O_f} \\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{(a + f'(\pmb{w})) \mod 2^N_o} &= \\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a + f'(\pmb{w})}{N_o}}\ket{a} &= \\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}e^{i2\pi\frac{f'(\pmb{w})}{N_o}}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} &= \\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}e^{i2\pi\frac{N}{ml}f(\frac{l}{N}(w - \frac{N}{2}))}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} & & \text{from Equation~\ref{eq:func-conversion}}
+\end{align}
+
+Note the appearance of $m$ in the last line. I can be thought of conversion of $N_o$ (max magnitude of $f'$) into magnitude of $f$, and is a maximal magnitude of $\nabla_f$ over the domain given domain.
+While I show derivation of relation between $n_o$ and $m$, I will later explicitly use the formula derived in~\cite{Jordan_2005}.
+
+Continuing analysis of the circuit:
+\begin{align}
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}e^{i2\pi\frac{N}{ml}f(\frac{l}{N}(w - \frac{N}{2}))}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} &= \\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}e^{i2\pi\frac{N}{ml}(f(0) + \frac{l}{N}(w - \frac{N}{2})\nabla_f)}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} &= & \text{from Equation~\ref{eq:grad-lemma}} \\
+    \frac{e^{i2\pi\frac{N}{ml}(f(0) - \frac{N}{2m})}}{\sqrt{N^d N_o}} \sum\limits_{w}e^{i2\pi\frac{w}{m}\nabla_f}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} &= \\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{w}e^{i2\pi\frac{w}{m}\nabla_f}\ket{\pmb{w}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} &\xrightarrow{QFT} & \text{Ignoring Global Phase}\\
+    \frac{1}{\sqrt{N^d N_o}} \sum\limits_{i = 1}^d \ket{\frac{N}{m}\frac{\partial f}{\partial w_i}}\sum\limits_{a}e^{i2\pi\frac{a}{N_o}}\ket{a} & & \text{Since $\nabla_f$ is just a vector of partial derivatives}
+\end{align}
+
+And hence we get a scaled gradient in the input registers.
+
 \section{Numerical Experiment}
 \subsection{Problem Description}
 \subsection{Implementation}
@@ -127,7 +221,7 @@ Let $n$ be the number of qubits of each $w_i$, and $n_o$ be the number of qubits
 \subsection{Additional Improvements}
 \textbf{\textcolor{red}{Fix section title}}
 
-\section{Improvements to Classical Gradient Calculation}
+\section{Devil's Advocate: Improvements to Classical Gradient Calculation}
 \subsection{Active Sampling vs. Passive Sampling}
 
 \section{Conclusion}
