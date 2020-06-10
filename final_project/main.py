@@ -8,7 +8,7 @@ else:
     from .qft import qft2
 
 
-def main(d: int, n: int, n_o: int, displacements = 0.0):
+def main(d: int, n: int, n_o: int, l: float, displacements = 0.0):
     num_qubits = d * n + n_o
     num_input_qubits = d * n
 
@@ -29,7 +29,8 @@ def main(d: int, n: int, n_o: int, displacements = 0.0):
         input_state=prep_output_state,
         size_out=n_o,
         dim_num=d,
-        displacements=displacements
+        displacements=displacements,
+        l=l
     )
 
     # QFT on each register
@@ -43,11 +44,12 @@ def main(d: int, n: int, n_o: int, displacements = 0.0):
     return post_qft
 
 if __name__ == "__main__":
+    l = 0.125
     d = 2
-    n = 2
-    # n_o = int(np.ceil(np.log2(10 * d * 2**(2*n - 1))))
-    n_o = int(np.ceil(np.log2(160 * d * 2**(n - 1))))
-    result = main(d, n, n_o, -1)
+    n = 3
+    n_o = 4
+
+    result = main(d, n, n_o, l, -0.5)
 
     reshape_results = np.reshape(result, (-1, 2**n_o))
     probabilities = [sum([float(x * x.conj()) for x in y]) for y in reshape_results]

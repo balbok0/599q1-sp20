@@ -152,14 +152,22 @@ def add_bit_strings(*args):
         return num_to_bitstring(result, max_len)
 
 
-def square_a_state(idx_of_state: int, size_of_out, size_of_dim, start, end, size_of_state, displacements):
+def square_a_state(idx_of_state: int, size_of_out, size_of_dim, start, end, size_of_state, displacements, l):
     inp = num_to_bitstring(idx_of_state, size_of_state)
 
     result = 0
     relative_end = end - start
+    half_size = 2**(size_of_dim - 1) * 1.0
     for disp_idx, idx in enumerate(range(0, relative_end - size_of_out, size_of_dim)):
-        result_idx = bitstring_to_num(inp[idx:idx + size_of_dim]) * 1.0 - displacements[disp_idx]
-        result += result_idx ** 2
+        x = bitstring_to_num(inp[idx:idx + size_of_dim])
+        x_arg = (x - half_size) / (2 * half_size) * l - displacements[disp_idx]
+        result += x_arg ** 2
+
+    # Without m
+    result *= half_size * 2 / l
+    # With m
+    # m = 2 * (np.max(np.abs(displacements)) + l)
+    # result *= half_size * 2 / (l * m)
 
     clean_result = num_to_bitstring(int(result), size_of_out)
     inp[relative_end - size_of_out:relative_end] = add_bit_strings(inp[relative_end - size_of_out:relative_end], clean_result)
@@ -170,7 +178,7 @@ def square_a_state(idx_of_state: int, size_of_out, size_of_dim, start, end, size
 
 SUM_SQUARES = {}
 
-def sum_squares(input_state: np.ndarray, size_out: int, dim_num: int = 1,  start: int = 0, end: int = None, displacements: Union[float, Set[float]] = 0.0):
+def sum_squares(input_state: np.ndarray, size_out: int, dim_num: int = 1,  start: int = 0, end: int = None, displacements: Union[float, Set[float]] = 0.0, l: float = 0.1):
     global SUM_SQUARES
     num_qubits_total = int(np.log2(len(input_state)))
 
@@ -203,7 +211,9 @@ def sum_squares(input_state: np.ndarray, size_out: int, dim_num: int = 1,  start
                 start=start,
                 end=end,
                 size_of_state=size_op,
-                displacements=displacements))
+                displacements=displacements,
+                l=l
+            ))
             result_op[idx, i] = 1
         SUM_SQUARES[key_to_global_dict] = result_op
     else:
