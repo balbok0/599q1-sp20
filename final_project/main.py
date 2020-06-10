@@ -46,20 +46,27 @@ def main(d: int, n: int, n_o: int, l: float, displacements = 0.0):
 if __name__ == "__main__":
     l = 0.125
     d = 2
-    n = 3
+    n = 2
     n_o = 4
 
-    result = main(d, n, n_o, l, -0.5)
+    # Result 0
+    run_defs = {
+        0: 0,
+        0.5: 3,
+        1: 4,
+        2: 4,
+    }
+    for p, target in run_defs.items():
+        print('')
+        print(f'p: {p}')
+        for n_o in range(3, 8):
+            result = main(d, n, n_o, l, p)
 
-    reshape_results = np.reshape(result, (-1, 2**n_o))
-    probabilities = [sum([float(x * x.conj()) for x in y]) for y in reshape_results]
+            reshape_results = np.reshape(result, (-1, 2**n_o))
+            probabilities = [sum([float(x * x.conj()) for x in y]) for y in reshape_results]
 
-    print(probabilities)
+            print(n_o)
+            print(probabilities[target])
+            print('')
 
-    print(sum(probabilities))
 
-    # print(np.linalg.norm(reshape_results, axis=1))
-    print(reshape_results.shape)
-
-    # print([float(x * x.conj()) for x in result])
-    # print(np.linalg.norm(result))

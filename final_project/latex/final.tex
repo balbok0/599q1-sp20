@@ -52,7 +52,7 @@
     this problem has not been widely discussed in Quantum Computing Community.
     In this project, I will try to implement algorithm presented in~\cite{Jordan_2005}.
     Additionally I will follow by discussing potential improvements of this paper, as discussed in~\cite{Gily_n_2019}.
-    Both of these are done on example of $f(x) = x^2$, with domain being $[0, 2^{\vec{n}}]$.
+    Both of these are done on example of $f(x) = x^2$.
 \end{abstract}
 
 % \section{Introduction}
@@ -69,7 +69,8 @@ Gradient Descent is trying to solve a problem of minimizing (or maximizing) a fu
 
 Since often finding a global minimum is computationally impossible, a lot of problems reduce to finding local minimum from a given starting point,
 and then repeating an experiment for set number of random starting points. In particular, vanilla gradient descent algorithm looks as follows:
-\begin{algorithm}[h]
+
+\begin{algorithm}[H]
     \SetAlgoLined
     \KwResult{An approximation of local minima of $f$ for starting point $\pmb{w}$, and dataset $X$}
     Let $f$ be parametrized by $\pmb{w}$. \;
@@ -211,8 +212,124 @@ And hence we get a scaled gradient in the input registers.
 
 \section{Numerical Experiment}
 \subsection{Problem Description}
+For the numerical I decided to calculate gradient of a rather simple function: $f(x) = x^2$.
+In this case input is a two dimensional vector, with an arbitrary domain (though I focused on region $[0, 2]$ for numerical reasons).
+
 \subsection{Implementation}
+For implementation I have used numpy, because initially I thought it would be the easiest way of implementing the code.
+However, now, I would probably use $Q\#$ and study less general problem due to failure of this implementation as explained later in
+Section~\ref{sec:num-results}.
+
+As mentioned before I used:
+\begin{itemize}
+    \item $d = 2$
+    \item $n = 2$
+    \item $n_o$ was a hyperparameter I played around with and will discuss its impact in Section~\ref{sec:num-results}.
+    \item $l = \frac{1}{8} = 0.125$
+\end{itemize}
+
+Given a binary vector $x$, number of dimensions of input $d$, number of qubits for each input dimension $n$,
+number of qubits in the output register $n_o$ and some $d$-dimensional point $p$ for which to calulate $f$,
+the $O_f$ was implemented as follows:
+
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \KwResult{Result of $f$ at point $p$ encoded into $nd + n_o$ dimensional binary vector}
+    Let result = 0\;
+    \For{\text{i = 0 to d}}{
+        Let $x_i$ be the integer with binary representation x[ni:n(i + 1)]\;
+        Let $x_i' = l\frac{x_i - \frac{N}{2}}{N} + p_i$\;
+        result = result + $x_i'^2$\;
+    }
+
+    result = $\lfloor\frac{N}{l}$result$\rfloor$\;
+
+    Let $r$ be result encoded in $n_o$-binary vector ($\mod 2^{n_o}$ if needed)\;
+    Add $r$ to the output register of x ($\mod 2^{n_o}$ if needed)\;
+
+    \caption{My Implementation of Jordan's Algorithm}
+    \label{alg:my-jordan}
+\end{algorithm}
+
+In more intuitive description Algorithm~\ref{alg:my-jordan} performs following steps:
+\begin{itemize}
+    \item Initialize sum to 0
+    \item For each feature:
+    \begin{itemize}
+        \item Convert feature from $x'$ format to $x$ (to match Equation~\ref{eq:func-conversion})
+        \item Add result of $f(x)$ to sum
+    \end{itemize}
+    \item Convert sum back to $x'$ format (i.e. Integer)
+    \item Add to output register
+\end{itemize}
+
+I had to also implement QFT, but since the circuit for that given in the class, I will not go into detail.
+
+All of the code (along with TeX and PDF version of this paper) is available in
+\href{https://github.com/balbok0/599q1-sp20/tree/master/final_project}{this repository}.
+
 \subsection{Results}
+
+The first and initial test I have performed was to calculate the gradient at $p = \begin{pmatrix} 0, 0 \end{pmatrix}$,
+since this exactly the case~\cite{Jordan_2005} described.
+For varying $n_o$ I get following results:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c||c c c c c|}
+        \hline
+        $n_o$ & 3 & 4 & 5 & 6 & 7 \\
+        \hline
+        $P(0)$ & $1 - 9 \cdot 10^{19}$ & $1 - 4 \cdot 10^{19}$ & $1 - 3 \cdot 10^{19}$ & $> 1 - 1 \cdot 10^{19}$ & $> 1 - 1 \cdot 10^{19}$ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+We can see that the algorithm outputs the correct answer (i.e. gradient is equal to $0$) with extremely high probability.
+This comes with no surprise since, in this case $O_f = \identity$, and hence for input algorithms the whole circuit evaluates to
+$(\text{QFT})(\text{QFT}^\dagger) = \identity$.
+
+However, the implementation of the Jordan's Algorithm starts breaking when we move point $p$ away from the function minima.
+Firstly for each point we will need to calculate $m$, which is the maximal derivative
+(i.e. $\max \{|\frac{\partial f(p + l)}{\partial x}|, |\frac{\partial f(p - l)}{\partial x}|\} =
+\max \{|2(p + l)|, |2(p - l)|\}$).
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c||c c c|}
+        \hline
+        $p$ & 0.5 & 1 & 2 \\
+        \hline
+        $m$ & 1.25 & 2.25 & 4.25 \\
+        \hline
+        $\frac{N}{m}$ & 3.2 & 1.78 & 0.94 \\
+        \hline
+        $\frac{N}{m}\frac{\partial f}{\partial x}$ & 3.2 & 3.55 & 3.76 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+We can see that $\frac{N}{m}$ is no longer $0$ so we cannot expect $\ket{\frac{N}{m}\frac{\partial f}{\partial x}}$ to be exact integer.
+However, simultaneously we can see that we would expect the highest probabilities in $\ket{3}, \ket{4}$ and $\ket{4}$ respectively.
+
+This is not reflected in the numerical results however, since the respective runs results in:
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c||c c c c c|}
+        \hline
+        $p$ & $n_o$ & 3 & 4 & 5 & 6 & 7 \\
+        \hline
+        $0.5$ & $P(3)$ & $0.031$ & $0.037$ & $0.15$ & $0.0043$ & $0.0011$ \\
+        \hline
+        $1$ & $P(4)$ & $0.0$ & $0.18$ & $0.083$ & $0.022$ & $0.0052$ \\
+        \hline
+        $2$ & $P(4)$ & $0.0$ & $0.0$ & $0.18$ & $0.083$ & $0.022$ \\
+        \hline
+    \end{tabular}
+\end{table}
+\subsubsection{Possible Reason for Failure}
+
+\label{sec:num-results}
 
 \section{Improvements to Jordan's Algorithm}
 \subsection{Different Way of Expressing Jordan's Algorithm}
@@ -228,11 +345,3 @@ And hence we get a scaled gradient in the input registers.
 % \newpage
 \printbibliography
 \end{document}
-
-
-
-% This is actually the Taylor series for $e^x$; so, substituting, we see:
-
-% \begin{align*}
-%     &= 2 \Big[ \sum_{k = 0}^{\infty} \frac{1}{k!} \Big(\frac{2\lambda t}{N}\Big)^k - 1 - \Big(\frac{2\lambda t}{N}\Big) \Big]
-% \end{align*}
