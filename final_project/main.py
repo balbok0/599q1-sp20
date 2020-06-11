@@ -8,7 +8,7 @@ else:
     from .qft import qft2
 
 
-def main(d: int, n: int, n_o: int, l: float, displacements = 0.0):
+def __main_algorithm(d: int, n: int, n_o: int, l: float, displacements = 0.0):
     num_qubits = d * n + n_o
     num_input_qubits = d * n
 
@@ -43,7 +43,8 @@ def main(d: int, n: int, n_o: int, l: float, displacements = 0.0):
     # print(post_qft)
     return post_qft
 
-if __name__ == "__main__":
+
+def main_paper_exp():
     l = 0.125
     d = 2
     n = 2
@@ -51,22 +52,61 @@ if __name__ == "__main__":
 
     # Result 0
     run_defs = {
-        0: 0,
-        0.5: 3,
-        1: 4,
-        2: 4,
+        0: [0],
+        0.5: [0, 3],
+        1: [0, 4],
+        2: [0, 4],
     }
-    for p, target in run_defs.items():
-        print('')
-        print(f'p: {p}')
-        for n_o in range(3, 8):
-            result = main(d, n, n_o, l, p)
-
-            reshape_results = np.reshape(result, (-1, 2**n_o))
-            probabilities = [sum([float(x * x.conj()) for x in y]) for y in reshape_results]
-
-            print(n_o)
-            print(probabilities[target])
+    for p, targets in run_defs.items():
+        for target in targets:
             print('')
+            print(f'p: {p}')
+            print(f'target: {target}')
+            for n_o in range(3, 8):
+                result = __main_algorithm(d, n, n_o, l, p)
 
+                reshape_results = np.reshape(result, (-1, 2**n_o))
+                probabilities = [sum([float(x * x.conj()) for x in y]) for y in reshape_results]
+
+                print(n_o)
+                print(probabilities[target])
+                print('')
+
+
+def main_to_play_around():
+    epsilon = 0.125
+    d = 2
+    n_o = 6
+
+    l = epsilon / (2 * np.sqrt(d))
+    N = 1 / epsilon
+    n = int(np.ceil(np.log2(N)))
+
+    # Result 0
+    run_defs = {
+        # 0: [0],
+        0.5: [3],
+        1: [4],
+        2: [4],
+    }
+    for p, targets in run_defs.items():
+        for target in targets:
+            print('')
+            print(f'p: {p}')
+            print(f'target: {target}')
+            for n_o in range(5, 8):
+                result = __main_algorithm(d, n, n_o, l, p)
+
+                reshape_results = np.reshape(result, (-1, 2**n_o))
+                probabilities = [sum([float(x * x.conj()) for x in y]) for y in reshape_results]
+
+                print(n_o)
+                idx = 2**n * target + target
+                print(probabilities)
+                print('')
+
+
+if __name__ == "__main__":
+    # main_paper_exp()
+    main_to_play_around()
 
