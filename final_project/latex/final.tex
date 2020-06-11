@@ -132,6 +132,7 @@ Additionally if we want to achieve $\epsilon$-precise result we need to have $|X
 Hence overall, this naive algorithm will take:
 \begin{align}
     O(\frac{dTN}{\epsilon^2})
+    \label{eq:grad-desc-comp}
 \end{align}
 gradient calculations, where $N$ is number of random starting points of $\pmb{w}$.
 
@@ -198,7 +199,7 @@ and only can be understood by transformations between equations, while the trans
 I believe that because of that this paper lacks a lot of clarity and makes it much harder to reproduce experimentally.
 
 \subsection{Algorithm Explanation}
-\label{sec:jord-expl}
+\label{subsec:jord-expl}
 Jordan Algorithm is still based on a vanilla gradient descent as mentioned in Section~\ref{subsec:grad-desc},
 however gradient calculation itself it done on quantum device as described in~\cite{Jordan_2005}, which is as follows.
 
@@ -457,20 +458,114 @@ is not explicit enough to be easily reproducible, and requires testing a lot of 
 This allows for a more-intuitive representation of range by just real number. The precision is still bounded by domain,
 which is a bit-encoding of a state.
 
-This causes algorithm to use $O(\sqrt{d})$ accesses to a new $0_f$ which is worse than original algorithm (at least for a single estimate),
-but still better than a classical calculation.
+This results in a modified algorithm (Algorithm 2 in ~\cite{Gily_n_2019}). I have also tried implementing it,
+but failed similarly to original Jordan's algorithm. That being said I have not spent nearly enough time debugging to have
+any significant conclusion about implementation.
 
 \subsection{Amplitude Amplification}
-\subsection{Grover Search}
-\subsection{Additional Improvements}
-\textbf{\textcolor{red}{Fix section title}}
+As briefly mentioned in Section~\ref{subsec:jord-expl} the algorithm does not output the correct gradient with $100\%$ accuracy.
+This is because there can be higher degree (non-linear) terms in the gradient of the function, which cause uncertainty in the gradient
+calculation.
 
-\section{Devil's Advocate: Improvements to Classical Gradient Calculation}
+Assuming that we want to output the algorithm with $\epsilon$ accuracy, we would need to perform Jordan's algorithm $\frac{1}{\epsilon^2}$ times.
+However, this can be quadratically improved with Amplitude Amplification~\cite{Brassard}, as shown in class, to $\frac{1}{\epsilon}$.
+
+This brings down the overall complexity of the algorithm (previously mentioned in Equation~\ref{eq:grad-desc-comp}) down to:
+\begin{align}
+    O(\frac{dTN}{\epsilon})
+    \label{eq:grad-amp-amp-comp}
+\end{align}
+
+\subsection{Grover Search}
+Since the algorithm using $N$ data-points to calculate a gradient on, we can use a slightly modified version of Grover's Search~\cite{Grover_1998}.
+Here, we need a subroutine that is finding a local minimum for a given point, (which is given by Algorithm~\ref{alg:vanilla-grad-desc}),
+then we can use a continuos global optimization algorithm described in~\cite{lara2013new} (Algorithm 3).
+
+This routine chooses up to $O(\sqrt{N})$ points at random at performs a local optimization algorithm from them.
+The slight modification in case of gradient descent is that $M$ (a set of marked elements) is not really defined.
+However, we can define a threshold below which a minimum after gradient descent should be in order for that element to be marked.
+As we keep hitting lower and lower minima we can decrease this threshold decreasing size of $M$.
+This allows us to use almost the exact version of the algorithm described in~\cite{lara2013new}, which results in overall complexity of
+the algorithm decreasing to:
+\begin{align}
+    O(\frac{dT\sqrt{N}}{\epsilon})
+\end{align}
+
+\subsection[latex is a meme]{$\sqrt{d}$ Improvements}
+I will give a very short and brief explanation of achieving a $\sqrt{d}$ complexity, as presented in~\cite{Gily_n_2019}.
+The idea behind it is that a majority of functions that are being optimized are differentiable up to a very high order.
+This can lead to expressing the error of gradient to be less than the sum of these higher-order terms.
+This on the other hand nicely evaluates to be in $O(\sqrt{d})$.
+
+A much more in-depth explanation of this method in presented in proof of Theorem 25 and Appendix A of~\cite{Gily_n_2019}.
+When combined with both Grover Search and Amplitude Amplification the algorithm complexity of:
+\begin{align}
+    O(\frac{T\sqrt{dN}}{\epsilon})
+    \label{final-complexity}
+\end{align}
+
+\section{Devil's Advocate: Computational Improvements to Classical Gradient Descent}
 \label{sec:class-imp}
-\subsection{Active Sampling vs. Passive Sampling}
+\subsection{Modern Gradient Calculation Frameworks}
+\label{subsec:class-grad-calc-framework}
+Modern Frameworks such as PyTorch~\cite{PyTorch} or TensorFlow~\cite{tensorflow2015-whitepaper} are using a method called
+computation graphs to calculate gradients. These are effectively $O(1)$ computational time, since they do almost exactly
+the same number of operations as $f$. (Causing the calculation to be $O(TN)$ if parallelized)
+
+For each of the operations such as activation functions, matrix multiplications, convolutions, loss functions etc.
+these frameworks have huge maps that map from an operation to its derivative calculation.
+In other words a gradient by linear approximation does not have to be calculated because it is known by the system already.
+
+These frameworks essentially build a huge graph of computation in memory (along with weights creating a model), which when
+doing inference is traversed forward and when updating weights is traversed backwards.
+Due to vast popularity and size of these tools, the space of functions that can be realistically approximated is large.
+
+However, there exist functions that will not be possible to realistically approximate at which point quantum computers will
+have a significant advantage.
+
+Lastly, since quantum computers can provide speed-ups in solving linear equations there is still a role in gradient computation
+for them even in the computation graph method.
+
+\subsection{Active Sampling}
+Vast majority of quantum algorithms and test cases described in the quantum computing papers mentioned in this project report
+are rather simple functions. In classical optimization Active Learning algorithms tend to perform extremely well in such scenarios.
+
+The simplest example for that would learning a threshold in a step function, there if we are sampling passively,
+we are not changing a domain from which we are sampling, and hence we would need $O(\frac{1}{\epsilon^2})$ to achieve error $\epsilon$
+with regards to true threshold.
+However when using an active learning, we are constantly decreasing the domain, so that each new sample gives us new information.
+In such case a $O(\frac{1}{\epsilon})$ is needed.
+
+The trade-off is pretty similar to Amplitude Amplification, and indeed these two ideas are very correlated, since they both are trying to
+maximize probability of sampling a meaningful information sample. However, it seems to me that Amplitude Amplification is stronger,
+since it does not require marked states to be close to each other.
+
+There exist many different active learning algorithms some focused more on exploration of data (i.e. gain as much information with as few samples as possible),
+and some focused on exploitation (i.e. gain as much performance with as few samples as possible).
+Since these have implemented only on classical computers so far, they are causing certain trade-offs when comparing actually
+optimal classical and quantum algorithms.
+
+Active Learning is still a rapidly growing field and it is unclear what gains (or sacrifices in equality) it might bring.
+Those techniques, in principle, should be implementable in quantum computers, thus further improving on gains of the quantum algorithms.
 
 \section{Conclusion}
 \label{sec:conclusion}
+In conclusion this project have diverted from the initial plan significantly.
+I have experienced major issues with small tweaks that had to be done to get any reasonable output through $O_f$ when implementing Jordan's algorithm,
+and still failed in the end. This forced me to read through~\cite{Gily_n_2019} more carefully, but implementation of this algorithm
+was also not successful (though it was a last minute effort).
+
+Overall, the project shifted that to more abstract discussion of the algorithm, along with more explicit explanation of the circuit, and
+how state looks like after each step. The more abstract discussion of improvements to Jordan's algorithm forced me to rethink whether there are
+any improvements on classical side, which resulted in Section~\ref{sec:class-imp}.
+
+While it is not a project I envisioned when submitting a proposal I believe that especially argument from Section~\ref{subsec:class-grad-calc-framework},
+shows that it will be an extremely long time until quantum computers might be useful in quantum calculation, if ever. This is apart from faster matrix multiplication.
+
+Lastly, I wanted to thank for a great course. I have learned a ton of stuff about quantum algorithms, which in turn helped me understand more
+sophisticated problems/algorithms such as ones mentioned during Quantum Seminars (at least on a basic level). While this quarter has extremely tough
+for a number of reasons, I really enjoyed a course, and even though it has been sometimes frustrating, I feel like it was a time well spent.
+
 % \newpage
 \printbibliography
 \end{document}
