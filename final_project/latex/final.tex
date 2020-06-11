@@ -10,6 +10,34 @@
 \usepackage{bm}
 \usepackage{indentfirst}
 \usepackage{qcircuit}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codegreen},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
 
 \usepackage[colorlinks,allcolors=blue]{hyperref} % optional
 \usepackage[noabbrev,capitalize,nameinlink]{cleveref}
@@ -41,7 +69,7 @@
 \newtheorem{problem}{Problem}
 
 
-
+\setcounter{section}{-1}
 \begin{document}
 
 \maketitle
@@ -50,12 +78,23 @@
     \noindent Gradient Descent has been a key technique for optimizing many Machine Learning Algorithms.
     However, due to extremely large number of parameters of modern models (up to $10^{11}$ floating points)
     this problem has not been widely discussed in Quantum Computing Community.
-    In this project, I will try to implement algorithm presented in~\cite{Jordan_2005}.
-    Additionally I will follow by discussing potential improvements of this paper, as discussed in~\cite{Gily_n_2019}.
+    In this project, I will try (and fail) implementing algorithm presented in~\cite{Jordan_2005}.
+    Additionally I will follow by discussing potential improvements of that paper, as discussed in~\cite{Gily_n_2019}.
     Both of these are done on example of $f(x) = x^2$.
 \end{abstract}
 
-% \section{Introduction}
+\section{Project Report Organization}
+I will start with the introduction of classical gradient descent algorithm, which will be unchanged,
+and classical gradient calculation. In Section~\ref{sec:jord-alg} I will explain Jordan's Algorithm,
+provide an explicit circuit, and do a much more explicit analysis of it than done originally in~\cite{Jordan_2005}.
+
+In Section~\ref{sec:num-exp} I will describe the experimental procedure, show results, as well as discuss possible reasons
+for the failure of this experiment.
+
+Section~\ref{sec:jor-improv} will discuss improvements to Jordan's Algorithm presented in~\cite{Gily_n_2019} on a more abstract level.
+This is followed by similarly abstract description of improvements done in classical gradient calculation in Section~\ref{sec:class-imp}.
+
+The project report ends with conclusion in Section~\ref{sec:conclusion}.
 
 \section{Introduction to Gradient Descent}
 \label{sec:intro-grad-desc}
@@ -117,7 +156,7 @@ Alternatively, we can switch Equation~\ref{eq:grad1} to:
 \end{align}
 which the same definition of $\pmb{h_i}$ as above. This requires $f$ to be called $2d$ times, since nothing can be reused.
 
-The Jordan algorithm calculates gradient using the first method, but has a few inspirations from second method.
+The Jordan algorithm calculates gradient using the second method, which generally leads to more accurate result.
 
 Additionally for future use, we can rewrite Equation~\ref{eq:grad1}:
 \begin{align}
@@ -211,6 +250,7 @@ Continuing analysis of the circuit:
 And hence we get a scaled gradient in the input registers.
 
 \section{Numerical Experiment}
+\label{sec:num-exp}
 \subsection{Problem Description}
 For the numerical I decided to calculate gradient of a rather simple function: $f(x) = x^2$.
 In this case input is a two dimensional vector, with an arbitrary domain (though I focused on region $[0, 2]$ for numerical reasons).
@@ -218,18 +258,23 @@ In this case input is a two dimensional vector, with an arbitrary domain (though
 \subsection{Implementation}
 For implementation I have used numpy, because initially I thought it would be the easiest way of implementing the code.
 However, now, I would probably use $Q\#$ and study less general problem due to failure of this implementation as explained later in
-Section~\ref{sec:num-results}.
+Section~\ref{subsec:num-results}.
 
 As mentioned before I used:
 \begin{itemize}
     \item $d = 2$
     \item $n = 2$
-    \item $n_o$ was a hyperparameter I played around with and will discuss its impact in Section~\ref{sec:num-results}.
+    \item $n_o$ was a hyperparameter I played around with and will discuss its impact in Section~\ref{subsec:num-results}.
     \item $l = \frac{1}{8} = 0.125$
 \end{itemize}
 
+While I am aware of the fact that these are not values that are optimal or relate to each other in a consistent way,
+as described in Section 5.1 of~\cite{Gily_n_2019}, using them does not significantly change results and conclusions
+presented in Section~\ref{subsec:num-results}. However, using them allowed for much faster dev time and testing different
+hypotheses about bugs.
+
 Given a binary vector $x$, number of dimensions of input $d$, number of qubits for each input dimension $n$,
-number of qubits in the output register $n_o$ and some $d$-dimensional point $p$ for which to calulate $f$,
+number of qubits in the output register $n_o$ and some $d$-dimensional point $p$ for which to calculate $f$,
 the $O_f$ was implemented as follows:
 
 \begin{algorithm}[H]
@@ -269,6 +314,7 @@ All of the code (along with TeX and PDF version of this paper) is available in
 \href{https://github.com/balbok0/599q1-sp20/tree/master/final_project}{this repository}.
 
 \subsection{Results}
+\label{subsec:num-results}
 
 The first and initial test I have performed was to calculate the gradient at $p = \begin{pmatrix} 0, 0 \end{pmatrix}$,
 since this exactly the case~\cite{Jordan_2005} described.
@@ -307,12 +353,19 @@ Firstly for each point we will need to calculate $m$, which is the maximal deriv
         $\frac{N}{m}\frac{\partial f}{\partial x}$ & 3.2 & 3.55 & 3.76 \\
         \hline
     \end{tabular}
+    \caption{
+        Approximate indexes of states that should have high probabilities after running Jordan's Algorithm for each $p$.
+        A point corresponding to value $p$ in this table is $(p, p)$
+        (i.e. value is encoded in both dimensions).
+    }
+    \label{tab:N-m-calc}
 \end{table}
 
 We can see that $\frac{N}{m}$ is no longer $0$ so we cannot expect $\ket{\frac{N}{m}\frac{\partial f}{\partial x}}$ to be exact integer.
 However, simultaneously we can see that we would expect the highest probabilities in $\ket{3}, \ket{4}$ and $\ket{4}$ respectively.
 
 This is not reflected in the numerical results however, since the respective runs results in:
+
 \begin{table}[h]
     \centering
     \begin{tabular}{|c|c||c c c c c|}
@@ -326,22 +379,98 @@ This is not reflected in the numerical results however, since the respective run
         $2$ & $P(4)$ & $0.0$ & $0.0$ & $0.18$ & $0.083$ & $0.022$ \\
         \hline
     \end{tabular}
+    \caption{
+        Failed runs of the program.
+        The moment we move away from the origin, the algorithm does no longer calculate
+        the correct gradient.
+    }
+    \label{tab:failed-runs-1}
 \end{table}
+
+We can see that the probabilities for correct answers are not close to the 1 at all. In fact all of them are below $0.2$.
+This means that the algorithm is not implemented correctly, but there is still some debugging,
+and analysis to pin-point where the problem is in the implementation.
+
 \subsubsection{Possible Reason for Failure}
 
-\label{sec:num-results}
+Let us look at probabilities of $\ket{0}$ for the failed runs, which are shown in Table~\ref{tab:failed-runs-1}:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c||c c c c c|}
+        \hline
+        $p$ & $n_o$ & 3 & 4 & 5 & 6 & 7 \\
+        \hline
+        $0.5$ & $P(0)$ & $0.18$ & $0.67$ & $0.91$ & $0.98$ & $0.99$ \\
+        \hline
+        $1$ & $P(0)$ & $0.0$ & $0.18$ & $0.67$ & $0.91$ & $0.98$ \\
+        \hline
+        $2$ & $P(0)$ & $0.0$ & $0.0$ & $0.18$ & $0.67$ & $0.91$ \\
+        \hline
+    \end{tabular}
+    \caption{
+        Probabilities of $P(0)$ state for the failed runs of the algorithm.
+    }
+    \label{tab:failed-runs-2}
+\end{table}
+
+The interesting trend in Table~\ref{tab:failed-runs-2} is a \textit{drift} of $P(0)$ as we increase $n_o$,
+or number of qubits in the output register.
+
+This suggests that there might be a significant problem with scaling that happens somewhere along in the algorithm.
+It most probably is due to my misunderstanding of some specific part of the algorithm,
+since I have tested both QFT and $f(x) = x^2$ for variety of inputs, and they have been providing expected outputs.
+I have not been able to exactly pinpoint what is causing the issue but to my best understanding it is within a function:
+\begin{lstlisting}[language=Python]
+    result = 0
+    relative_end = end - start
+    half_size = 2**(size_of_dim - 1) * 1.0
+    for disp_idx, idx in enumerate(range(0, relative_end - size_of_out, size_of_dim)):
+        x = bitstring_to_num(inp[idx:idx + size_of_dim])
+        x_arg = (x - half_size) / (2 * half_size) * l - displacements[disp_idx]
+        result += x_arg ** 2
+
+    result *= half_size * 2 / l
+
+    clean_result = num_to_bitstring(int(result), size_of_out)
+    inp[relative_end - size_of_out:relative_end] = \
+        add_bit_strings(inp[relative_end - size_of_out:relative_end], clean_result)
+\end{lstlisting}
+which tries to implement the Algorithm~\ref{alg:my-jordan}.
+
+This brings me to definition of $m$ which is very vague in~\cite{Jordan_2005}, with its description being
+"$m$ is the size of the interval which bound the components of $\nabla f$".
+My description of it above Table~\ref{tab:N-m-calc} matches it, but it is very possible that I have not implemented it properly.
+
+Here, I just wanted to conclude my efforts on the practical side of the project. My goal was to work alone trying to reproduce
+results from~\cite{Jordan_2005}, and expand on them by comparison to modern gradient calculation tools
+(\href{https://github.com/HIPS/autograd}{autograd}, \href{https://github.com/google/jax}{JAX} etc.).
+The main motivation behind that was that gradient calculation technique on classical computing also improved significantly over last decade.
+
+However, I believe that what I have shown is that~\cite{Jordan_2005}, while being of huge importance in for Quantum Gradient Calculation,
+is not explicit enough to be easily reproducible, and requires testing a lot of assumptions implicit within the text.
 
 \section{Improvements to Jordan's Algorithm}
+\label{sec:jor-improv}
 \subsection{Different Way of Expressing Jordan's Algorithm}
+\cite{Gily_n_2019} presents a modified version of Jordan's Algorithm which uses phase-oracle rather than a bit-oracle.
+This allows for a more-intuitive representation of range by just real number. The precision is still bounded by domain,
+which is a bit-encoding of a state.
+
+This causes algorithm to use $O(\sqrt{d})$ accesses to a new $0_f$ which is worse than original algorithm (at least for a single estimate),
+but still better than a classical calculation.
+
 \subsection{Amplitude Amplification}
 \subsection{Grover Search}
 \subsection{Additional Improvements}
 \textbf{\textcolor{red}{Fix section title}}
 
 \section{Devil's Advocate: Improvements to Classical Gradient Calculation}
+\label{sec:class-imp}
 \subsection{Active Sampling vs. Passive Sampling}
 
 \section{Conclusion}
+\label{sec:conclusion}
 % \newpage
 \printbibliography
 \end{document}
