@@ -1,11 +1,11 @@
 import numpy as np
 
 if __name__ == "__main__":
-    from helpers import scale_gate_to_n_qubits, sum_squares, H
-    from qft import qft2
+    from helpers import scale_gate_to_n_qubits, sum_squares, H, apply_to_all, sum_squares_phase
+    from qft import qft2, qft_gn
 else:
-    from .helpers import scale_gate_to_n_qubits, sum_squares, H
-    from .qft import qft2
+    from .helpers import scale_gate_to_n_qubits, sum_squares, H, apply_to_all, sum_squares_phase
+    from .qft import qft2, qft_gn
 
 
 def __main_algorithm(d: int, n: int, n_o: int, l: float, displacements = 0.0):
@@ -41,6 +41,28 @@ def __main_algorithm(d: int, n: int, n_o: int, l: float, displacements = 0.0):
     # post_qft = qft2(blackbox_state, end=num_input_qubits)
 
     # print(post_qft)
+    return post_qft
+
+
+def __main_algorithm_phase(d: int, n: int, displacements = 0.0):
+    num_qubits = d * n
+
+    # Prepare a state
+    input_state = np.zeros(2 ** num_qubits, dtype=complex)
+    input_state[0] = 1
+
+    # Apply Hadamard to input_qubits
+    prep_input_state = apply_to_all(num_qubits, H) @ input_state
+
+    # Oracle Call
+    post_oracle_state = sum_squares_phase(prep_input_state, d, displacements)
+
+    # QFT Gn on each register
+    post_qft = np.copy(post_oracle_state)
+    for idx in range(d):
+        start_idx = idx * n
+        post_qft = qft_gn(post_qft, start_idx, start_idx + n, inverse=True)
+
     return post_qft
 
 
@@ -106,7 +128,15 @@ def main_to_play_around():
                 print('')
 
 
+def main_phase():
+    d = 2
+    n = 4
+    result = [float(x * x.conj()) for x in __main_algorithm_phase(d, n)]
+    print(result)
+
+
 if __name__ == "__main__":
-    # main_paper_exp()
-    main_to_play_around()
+    main_paper_exp()
+    # main_to_play_around()
+    main_phase()
 

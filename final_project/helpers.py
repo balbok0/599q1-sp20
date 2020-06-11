@@ -9,6 +9,11 @@ H = 1. / np.sqrt(2) * np.array(
     ]
 )
 
+
+def to_Gn(x, num_qubits):
+    return x / 2**num_qubits - 0.5 + 2**(-num_qubits-1)
+
+
 def apply_to_all(num_qubits: int, gate: np.ndarray):
     r"""Applies the same gate over all of the qubits
 
@@ -21,7 +26,7 @@ def apply_to_all(num_qubits: int, gate: np.ndarray):
             which corresponds to the provided `gate` applied simultaneously on all qubits.
     """
     result = None
-    for _ in num_qubits:
+    for _ in range(num_qubits):
         if result is None:
             result = gate
         else:
@@ -240,6 +245,45 @@ def sum_squares(input_state: np.ndarray, size_out: int, dim_num: int = 1,  start
             input_state
         )
 
+
+def square_a_state_phase(idx_of_state, size_of_dim, size_of_state, displacements):
+    inp = num_to_bitstring(idx_of_state, size_of_state)
+
+    result = 0.0
+    for disp_idx, idx in enumerate(range(0, size_of_state, size_of_dim)):
+        x = bitstring_to_num(inp[idx:idx + size_of_dim])
+        x_arg = to_Gn(x, size_of_dim)
+        print(f'x: {x}')
+        print(f'x_arg: {x_arg}')
+        result += (x_arg - displacements[disp_idx])**2
+    return result
+
+def sum_squares_phase(input_state: np.ndarray, dim_num: int = 1, displacements: Union[float, Set[float]] = 0.0):
+    if not hasattr(displacements, 'len'):
+        displacements = [displacements] * dim_num
+    else:
+        displacements = list(displacements)
+        assert len(displacements) == dim_num
+
+    size_op = int(np.log2(len(input_state)))
+
+    assert size_op % dim_num == 0
+
+    size_of_dim = size_op // dim_num
+
+    N = 2**size_of_dim
+
+    result_op = np.zeros((2**size_op, 2**size_op), dtype=complex)
+    for i in range(2**size_op):
+        f_result = square_a_state_phase(
+            idx_of_state=i,
+            size_of_dim=size_of_dim,
+            size_of_state=size_op,
+            displacements=displacements
+        )
+        result_op[i, i] = np.exp(2 * np.pi * complex(0, 1) * N * f_result)
+
+    return result_op @ input_state
 
 if __name__ == "__main__":
     np.set_printoptions(threshold=np.inf)
